@@ -1,0 +1,186 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<section class="request-details-section">
+    <div class="container">
+        <div class="request-details-header">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Request Details</li>
+                </ol>
+            </nav>
+            <h1>Request Details</h1>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="request-details-card">
+                    <div class="request-status 
+                        {% if request.status == 'pending' %}status-pending
+                        {% elif request.status == 'accepted' %}status-accepted
+                        {% elif request.status == 'completed' %}status-completed
+                        {% elif request.status == 'cancelled' %}status-cancelled
+                        {% endif %}">
+                        {{ request.status|capitalize }}
+                    </div>
+                    
+                    <div class="request-type-badge 
+                        {% if request.type == 'visual_assistance' %}badge-visual
+                        {% elif request.type == 'hearing_assistance' %}badge-hearing
+                        {% elif request.type == 'mobility_support' %}badge-mobility
+                        {% elif request.type == 'speech_assistance' %}badge-speech
+                        {% elif request.type == 'cognitive_support' %}badge-cognitive
+                        {% elif request.type == 'emotional_support' %}badge-emotional
+                        {% endif %}">
+                        <i class="fas 
+                        {% if request.type == 'visual_assistance' %}fa-eye
+                        {% elif request.type == 'hearing_assistance' %}fa-deaf
+                        {% elif request.type == 'mobility_support' %}fa-wheelchair
+                        {% elif request.type == 'speech_assistance' %}fa-comment-alt
+                        {% elif request.type == 'cognitive_support' %}fa-brain
+                        {% elif request.type == 'emotional_support' %}fa-heart
+                        {% endif %}"></i>
+                        {{ request.type|replace('_', ' ')|title }}
+                    </div>
+                    
+                    <h2>{{ request.title }}</h2>
+                    
+                    <div class="request-details-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <div>
+                                <h6>Location</h6>
+                                <p>{{ request.location|default('Not specified') }}</p>
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <div>
+                                <h6>Date</h6>
+                                <p>{{ request.date|default('Not specified') }}</p>
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            <div>
+                                <h6>Time</h6>
+                                <p>{{ request.time|default('Not specified') }}</p>
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-hourglass-half"></i>
+                            <div>
+                                <h6>Duration</h6>
+                                <p>{{ request.duration|default('Not specified') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="request-details-description">
+                        <h3>Description</h3>
+                        <p>{{ request.description }}</p>
+                    </div>
+                    
+                    {% if request.requirements %}
+                    <div class="request-details-requirements">
+                        <h3>Requirements</h3>
+                        <ul>
+                            {% for requirement in request.requirements %}
+                                <li>{{ requirement }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    
+                    {% if request.status == 'pending' %}
+                    <div class="request-details-actions">
+                        <form action="{{ url_for('accept_request', request_id=request_id) }}" method="POST">
+                            <button type="submit" class="btn btn-primary btn-lg">Accept Request</button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="requester-card">
+                    <h3>About the Requester</h3>
+                    <div class="requester-info">
+                        <div class="requester-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="requester-details">
+                            <h4>{{ requester.name|default('Anonymous') }}</h4>
+                            {% if 'joined_date' in requester %}
+                                <p><i class="fas fa-calendar-check"></i> Member since {{ requester.joined_date }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if 'bio' in requester and requester.bio %}
+                        <div class="requester-bio">
+                            <p>{{ requester.bio }}</p>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="contact-requester">
+                        <h5>Contact Options</h5>
+                        {% if request.status == 'accepted' %}
+                            {% if 'phone' in requester and requester.phone %}
+                                <a href="tel:{{ requester.phone }}" class="btn btn-outline-primary btn-sm"><i class="fas fa-phone"></i> Call</a>
+                            {% endif %}
+                            
+                            {% if 'email' in requester and requester.email %}
+                                <a href="mailto:{{ requester.email }}" class="btn btn-outline-primary btn-sm"><i class="fas fa-envelope"></i> Email</a>
+                            {% endif %}
+                            
+                            <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#chatModal"><i class="fas fa-comment"></i> Chat</button>
+                        {% else %}
+                            <p class="text-muted">Contact information will be available after accepting the request.</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="safety-card">
+                    <h3>Safety Tips</h3>
+                    <ul class="safety-tips">
+                        <li><i class="fas fa-shield-alt"></i> Meet in public places when possible</li>
+                        <li><i class="fas fa-user-friends"></i> Inform someone about your volunteering activity</li>
+                        <li><i class="fas fa-clock"></i> Set clear expectations about time commitment</li>
+                        <li><i class="fas fa-exclamation-triangle"></i> Report any concerns to Vision AI support</li>
+                    </ul>
+                    <div class="emergency-button">
+                        <a href="tel:112" class="btn btn-danger btn-sm"><i class="fas fa-phone-alt"></i> Emergency Contact</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Chat Modal -->
+    <div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="chatModalLabel">Chat with {{ requester.name|default('Requester') }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="chat-container">
+                        <div class="chat-messages">
+                            <div class="chat-message-system">
+                                <p>This is the beginning of your conversation with {{ requester.name|default('the requester') }}.</p>
+                            </div>
+                        </div>
+                        <div class="chat-input">
+                            <input type="text" class="form-control" placeholder="Type a message...">
+                            <button class="btn btn-primary send-button"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

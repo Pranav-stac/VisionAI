@@ -1,0 +1,337 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container position-relative" style="z-index: 2">
+        <div class="row align-items-center">
+            <div class="col-lg-6 slide-up">
+                <h1 class="glow-text">Make a Difference in Someone's Life</h1>
+                <p class="lead">Join Vision AI's volunteer community to assist specially-abled individuals with navigation, communication, and everyday tasks.</p>
+                <div class="hero-buttons">
+                    <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Become a Volunteer</a>
+                    <a href="#how-it-works" class="btn btn-outline-secondary btn-lg">Learn More</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="hero-wave" style="z-index: 1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+            <path fill="#121212" fill-opacity="1" d="M0,128L48,154.7C96,181,192,235,288,224C384,213,480,139,576,122.7C672,107,768,149,864,181.3C960,213,1056,235,1152,213.3C1248,192,1344,128,1392,96L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+        </svg>
+    </div>
+</section>
+
+<!-- Impact Stats -->
+<section class="impact-stats">
+    <div class="container">
+        <div class="row justify-content-center text-center">
+            <div class="col-md-3 impact-item zoom-in">
+                <div class="impact-icon">
+                    <i class="fas fa-hands-helping"></i>
+                </div>
+                <h2 class="counter">500+</h2>
+                <p>Volunteers</p>
+            </div>
+            <div class="col-md-3 impact-item zoom-in" data-delay="200">
+                <div class="impact-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h2 class="counter">2,000+</h2>
+                <p>People Helped</p>
+            </div>
+            <div class="col-md-3 impact-item zoom-in" data-delay="400">
+                <div class="impact-icon">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <h2 class="counter">5,000+</h2>
+                <p>Tasks Completed</p>
+            </div>
+            <div class="col-md-3 impact-item zoom-in" data-delay="600">
+                <div class="impact-icon">
+                    <i class="fas fa-globe"></i>
+                </div>
+                <h2 class="counter">20+</h2>
+                <p>Cities Covered</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="how-it-works-section" id="how-it-works">
+    <div class="container">
+        <div class="section-header text-center">
+            <h2>How It Works</h2>
+            <p>Join Vision AI's volunteer network in three simple steps</p>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="step-card slide-up">
+                    <div class="step-number">1</div>
+                    <div class="step-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <h3>Register & Verify</h3>
+                    <p>Create an account as an individual or organization and complete the verification process.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="step-card slide-up" data-delay="200">
+                    <div class="step-number">2</div>
+                    <div class="step-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h3>Receive Requests</h3>
+                    <p>Get notified when someone nearby needs assistance that matches your skills.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="step-card slide-up" data-delay="400">
+                    <div class="step-number">3</div>
+                    <div class="step-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h3>Provide Help</h3>
+                    <p>Accept the request and make a meaningful difference in someone's life.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Volunteer Categories -->
+<section class="categories-section">
+    <div class="container">
+        <div class="section-header text-center">
+            <h2>Ways You Can Help</h2>
+            <p>Choose from various volunteering opportunities based on your skills</p>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="category-card slide-up">
+                    <div class="category-icon">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <h3>Visual Assistance</h3>
+                    <p>Help blind or low-vision individuals with reading, navigating, or identifying objects.</p>
+                    <ul>
+                        <li>Reading mail or documents</li>
+                        <li>Helping with shopping</li>
+                        <li>Exam writing assistance</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="category-card slide-up" data-delay="200">
+                    <div class="category-icon">
+                        <i class="fas fa-deaf"></i>
+                    </div>
+                    <h3>Hearing Assistance</h3>
+                    <p>Assist deaf or hard-of-hearing individuals with communication in various settings.</p>
+                    <ul>
+                        <li>Sign language interpretation</li>
+                        <li>Communication assistance</li>
+                        <li>Captioning help for events</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="category-card slide-up" data-delay="400">
+                    <div class="category-icon">
+                        <i class="fas fa-wheelchair"></i>
+                    </div>
+                    <h3>Mobility Support</h3>
+                    <p>Help individuals with mobility impairments access locations and services.</p>
+                    <ul>
+                        <li>Transportation assistance</li>
+                        <li>Navigating inaccessible areas</li>
+                        <li>Running errands</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="category-card slide-up" data-delay="100">
+                    <div class="category-icon">
+                        <i class="fas fa-comment-alt"></i>
+                    </div>
+                    <h3>Speech Assistance</h3>
+                    <p>Support non-verbal individuals with communication in everyday situations.</p>
+                    <ul>
+                        <li>Communication aid</li>
+                        <li>Assistance in public settings</li>
+                        <li>Help with phone calls</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="category-card slide-up" data-delay="300">
+                    <div class="category-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>Cognitive Support</h3>
+                    <p>Assist individuals with cognitive disabilities in various daily activities.</p>
+                    <ul>
+                        <li>Task management</li>
+                        <li>Learning assistance</li>
+                        <li>Organization help</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="category-card slide-up" data-delay="500">
+                    <div class="category-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h3>Emotional Support</h3>
+                    <p>Provide companionship and emotional support to reduce isolation.</p>
+                    <ul>
+                        <li>Friendly conversation</li>
+                        <li>Activity companionship</li>
+                        <li>Social interaction</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="testimonials-section" id="testimonials">
+    <div class="container">
+        <div class="section-header text-center">
+            <h2>Volunteer Stories</h2>
+            <p>Hear from people who are making a difference</p>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="testimonial-card zoom-in">
+                    <div class="testimonial-image">
+                        <img src="{{ url_for('static', filename='images/volunteer1.jpg') }}" alt="Volunteer">
+                    </div>
+                    <div class="testimonial-content">
+                        <p>"Being able to help someone navigate their college campus has been incredibly rewarding. I've made a new friend while making education more accessible."</p>
+                        <h4>Amit Sharma</h4>
+                        <p class="testimonial-role">Mobility Assistant Volunteer</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="testimonial-card zoom-in" data-delay="200">
+                    <div class="testimonial-image">
+                        <img src="{{ url_for('static', filename='images/volunteer2.jpg') }}" alt="Volunteer">
+                    </div>
+                    <div class="testimonial-content">
+                        <p>"As a sign language interpreter, I've helped connect deaf individuals with essential services. It's amazing to see barriers fall away with just a little help."</p>
+                        <h4>Priya Patel</h4>
+                        <p class="testimonial-role">Sign Language Volunteer</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="testimonial-card zoom-in" data-delay="400">
+                    <div class="testimonial-image">
+                        <i class="fas fa-user-circle fa-4x"></i>
+                    </div>
+                    <div class="testimonial-content">
+                        <p>"I volunteer to read and write exams for visually impaired students. Their determination inspires me every day, and I'm grateful to be part of their journey."</p>
+                        <h4>Rahul Verma</h4>
+                        <p class="testimonial-role">Visual Assistance Volunteer</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8 fade-in">
+                <h2>Ready to Make a Difference?</h2>
+                <p>Join thousands of volunteers helping specially-abled individuals gain independence and access to everyday activities.</p>
+            </div>
+            <div class="col-lg-4 text-lg-end slide-up">
+                <a href="{{ url_for('register') }}" class="btn btn-light btn-lg">Join Now</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Animate elements when they come into view
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize animations with delay support
+        const animateElements = document.querySelectorAll('.fade-in, .slide-up, .zoom-in');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const el = entry.target;
+                    const delay = el.getAttribute('data-delay') || 0;
+                    
+                    setTimeout(() => {
+                        el.style.opacity = 1;
+                        el.style.transform = 'none';
+                    }, delay);
+                    
+                    observer.unobserve(el);
+                }
+            });
+        }, {
+            threshold: 0.1
+        });
+        
+        animateElements.forEach(el => {
+            el.style.opacity = 0;
+            if (el.classList.contains('slide-up')) {
+                el.style.transform = 'translateY(30px)';
+            } else if (el.classList.contains('zoom-in')) {
+                el.style.transform = 'scale(0.9)';
+            }
+            observer.observe(el);
+        });
+        
+        // Counter animation for impact stats
+        const counterElements = document.querySelectorAll('.counter');
+        
+        counterElements.forEach(counter => {
+            const target = counter.textContent;
+            const isPlus = target.includes('+');
+            const numTarget = parseInt(target.replace(/\D/g, ''));
+            
+            counter.textContent = '0';
+            
+            const counterObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        let count = 0;
+                        const duration = 2000; // 2 seconds
+                        const interval = duration / numTarget < 15 ? 15 : duration / numTarget;
+                        
+                        const counterInterval = setInterval(() => {
+                            count += Math.ceil(numTarget / (duration / interval));
+                            if (count >= numTarget) {
+                                count = numTarget;
+                                clearInterval(counterInterval);
+                            }
+                            counter.textContent = count + (isPlus ? '+' : '');
+                        }, interval);
+                        
+                        counterObserver.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.5
+            });
+            
+            counterObserver.observe(counter);
+        });
+    });
+</script>
+{% endblock %}

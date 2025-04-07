@@ -1,0 +1,141 @@
+{
+  "status": {
+    "ChdTpklscSesob6BXHfXQ8IVUut1": {
+      "last_seen": 1742665049367,
+      "status": "offline"
+    }
+  },
+  "users": {
+    "ChdTpklscSesob6BXHfXQ8IVUut1": {
+      "createdAt": "2025-03-22T17:26:17.481Z",
+      "email": "sengupta.a@somaiya.edu",
+      "fullName": "Aniruddh",
+      "last_seen": 1742665037524,
+      "online": true,
+      "type": "individual",
+      "verified": false
+    },
+    "user1": {
+      "fullName": "Priya Sharma",
+      "email": "priya.sharma@example.com",
+      "type": "individual",
+      "verified": true,
+      "verification_status": "verified",
+      "createdAt": "2024-01-15T10:30:00Z",
+      "bio": "Visually impaired student seeking assistance with academic tasks",
+      "disability_type": "visual_impairment",
+      "skills": ["braille", "screen-reader-proficient"],
+      "location": "Mumbai, Maharashtra",
+      "preferences": {
+        "preferred_gender": "any",
+        "language": ["Hindi", "English"],
+        "assistance_type": ["reading", "writing", "navigation"]
+      },
+      "emergency_contact": {
+        "name": "Rajesh Sharma",
+        "relation": "Father",
+        "phone": "+91-9876543210"
+      }
+    },
+    "user2": {
+      "fullName": "Arjun Patel",
+      "email": "arjun.patel@example.com",
+      "type": "individual",
+      "verified": true,
+      "verification_status": "verified",
+      "createdAt": "2024-01-20T14:15:00Z",
+      "bio": "Hearing impaired professional seeking sign language interpreters",
+      "disability_type": "hearing_impairment",
+      "skills": ["sign-language", "lip-reading"],
+      "location": "Bangalore, Karnataka",
+      "preferences": {
+        "preferred_gender": "any",
+        "language": ["Kannada", "English", "ISL"],
+        "assistance_type": ["interpretation", "communication"]
+      }
+    }
+  },
+  "help_requests": {
+    "request1": {
+      "title": "Need assistance with college exam",
+      "description": "Looking for a volunteer to help read and write my final semester examination. Duration: 3 hours",
+      "user_id": "user1",
+      "created_at": "2024-02-10T09:00:00Z",
+      "status": "active",
+      "priority": "high",
+      "location": "Mumbai University, Kalina Campus",
+      "date_needed": "2024-02-15T10:00:00Z",
+      "duration": "3 hours",
+      "requirements": ["Patient", "Clear pronunciation", "Academic background"],
+      "disability_type": "visual_impairment",
+      "assistance_type": ["reading", "writing"]
+    },
+    "request2": {
+      "title": "Sign language interpreter for job interview",
+      "description": "Need a sign language interpreter for a software developer job interview",
+      "user_id": "user2",
+      "created_at": "2024-02-11T11:30:00Z",
+      "status": "active",
+      "priority": "urgent",
+      "location": "Electronic City, Bangalore",
+      "date_needed": "2024-02-14T15:00:00Z",
+      "duration": "1 hour",
+      "requirements": ["ISL proficient", "Tech terminology knowledge"],
+      "disability_type": "hearing_impairment",
+      "assistance_type": ["interpretation"]
+    }
+  },
+  "organizations": {
+    "org1": {
+      "org_name": "Vision Support Foundation",
+      "email": "contact@visionsupport.org",
+      "phone": "+91-8765432109",
+      "website": "www.visionsupport.org",
+      "type": "organization",
+      "verification_status": "verified",
+      "created_at": "2023-12-01T00:00:00Z",
+      "description": "Supporting visually impaired individuals through technology and volunteer assistance",
+      "domains": ["education", "employment", "accessibility"],
+      "volunteers": {
+        "vol1": {
+          "name": "Amit Kumar",
+          "role": "Education Assistant",
+          "status": "active",
+          "joined_at": "2024-01-05T00:00:00Z"
+        }
+      }
+    }
+  },
+  "volunteer_profiles": {
+    "vol1": {
+      "fullName": "Amit Kumar",
+      "email": "amit.kumar@example.com",
+      "type": "volunteer",
+      "verified": true,
+      "verification_status": "verified",
+      "createdAt": "2024-01-05T00:00:00Z",
+      "bio": "Passionate about helping visually impaired students achieve their academic goals",
+      "skills": ["reading", "writing", "screen-reader-assistance"],
+      "languages": ["Hindi", "English"],
+      "availability": {
+        "monday": ["morning", "evening"],
+        "wednesday": ["afternoon"],
+        "saturday": ["morning", "afternoon", "evening"]
+      },
+      "total_hours": 45,
+      "rating": 4.9,
+      "people_helped": 12
+    }
+  },
+  "completed_requests": {
+    "comp1": {
+      "request_id": "request_old_1",
+      "volunteer_id": "vol1",
+      "user_id": "user1",
+      "completed_at": "2024-01-30T15:00:00Z",
+      "duration": "2.5 hours",
+      "rating": 5,
+      "feedback": "Excellent assistance, very patient and helpful"
+    }
+  }
+}

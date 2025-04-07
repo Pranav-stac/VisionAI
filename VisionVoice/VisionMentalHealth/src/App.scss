@@ -1,0 +1,277 @@
+:root {
+  --text: #333333;
+  --gray-200: #e0e0e0;
+  --gray-300: #b0b0b0;
+  --gray-500: #808080;
+  --gray-600: #606060;
+  --gray-700: #404040;
+  --gray-800: #303030;
+  --gray-900: #f5f5f5;
+  --gray-1000: #ffffff;
+  --border-stroke: #d0d0d0;
+  --accent-blue: #8ecdf7;
+  --accent-blue-active-bg: #e8f4fd;
+  --accent-blue-active: #4a9bd8;
+  --accent-blue-headers: #2884d8;
+  --accent-green: #a8dab5;
+
+  --midnight-blue: #e8f4fd;
+  --blue-30: #4a9bd8;
+
+  --accent-red: #f06060;
+
+  --background: var(--gray-1000);
+  --color: var(--text);
+
+  scrollbar-color: var(--gray-300) var(--gray-200);
+  scrollbar-width: thin;
+
+  --font-family: "Space Mono", monospace;
+
+  /* */
+  --Neutral-00: #ffffff;
+  --Neutral-5: #f8f8f8;
+  --Neutral-10: #f0f0f0;
+  --Neutral-15: #e8e8e8;
+  --Neutral-20: #e0e0e0;
+  --Neutral-30: #d0d0d0;
+  --Neutral-50: #a0a0a0;
+  --Neutral-60: #808080;
+  --Neutral-80: #505050;
+  --Neutral-90: #333333;
+
+  --Green-500: #4caf50;
+  --Green-700: #2e7d32;
+
+  --Blue-500: #4a9bd8;
+  --Blue-800: #d4eaff;
+
+  --Red-400: #f8c9c9;
+  --Red-500: #f06060;
+  --Red-600: #e04545;
+  --Red-700: #d03030;
+}
+
+body {
+  font-family: "Space Mono", monospace;
+  background: var(--Neutral-5);
+  color: var(--Neutral-90);
+}
+
+.material-symbols-outlined {
+  &.filled {
+    font-variation-settings:
+      "FILL" 1,
+      "wght" 400,
+      "GRAD" 0,
+      "opsz" 24;
+  }
+}
+
+.space-mono-regular {
+  font-family: "Space Mono", monospace;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.space-mono-bold {
+  font-family: "Space Mono", monospace;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.space-mono-regular-italic {
+  font-family: "Space Mono", monospace;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.space-mono-bold-italic {
+  font-family: "Space Mono", monospace;
+  font-weight: 700;
+  font-style: italic;
+}
+
+.hidden {
+  display: none;
+}
+
+.flex {
+  display: flex;
+}
+
+.h-screen-full {
+  height: 100vh;
+}
+
+.w-screen-full {
+  width: 100vw;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+@media (prefers-reduced-motion: no-preference) {}
+
+.streaming-console {
+  background: var(--Neutral-5);
+  color: var(--Neutral-90);
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+
+  a,
+  a:visited,
+  a:active {
+    color: var(--Neutral-60);
+  }
+
+  .disabled {
+    pointer-events: none;
+
+    >* {
+      pointer-events: none;
+    }
+  }
+
+  main {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+    gap: 1rem;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .main-app-area {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--Neutral-00);
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    padding: 20px;
+    margin: 15px;
+  }
+
+  .function-call {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 50%;
+    overflow-y: auto;
+  }
+}
+
+/* video player */
+.stream {
+  flex-grow: 1;
+  max-width: 90%;
+  border-radius: 18px;
+  max-height: fit-content;
+  border: 2px solid var(--Neutral-20);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+// Mobile optimizations
+@media (max-width: 768px) {
+  .App {
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+  }
+
+  .streaming-console {
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+  }
+
+  main {
+    height: calc(100% - 40vh);
+    position: relative;
+    padding-bottom: 60px; /* Space for control tray */
+  }
+
+  .main-app-area {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  // Hide video on mobile, keeping only audio
+  .stream {
+    display: none !important;
+  }
+
+  .side-panel {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 40vh !important;
+    position: relative !important;
+    z-index: 999 !important;
+    background-color: var(--Neutral-00) !important;
+    border-radius: 12px 12px 0 0 !important;
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  .side-panel-container {
+    max-height: 30vh !important;
+    overflow-y: auto !important;
+  }
+
+  .side-panel.open {
+    width: 100% !important;
+    height: 40vh !important;
+  }
+
+  .control-tray {
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    background-color: rgba(255, 255, 255, 0.9);
+    z-index: 1001;
+    padding: 10px;
+    box-sizing: border-box;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  }
+
+  .vega-embed {
+    width: 100% !important;
+    max-width: 90vw !important;
+  }
+}
+
+// Fix for iOS Safari viewport height issues
+html, body {
+  height: -webkit-fill-available;
+}
+
+// Add safe area insets for notched devices
+@supports (padding: max(0px)) {
+  .App {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .control-tray {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}

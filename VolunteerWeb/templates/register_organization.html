@@ -1,0 +1,218 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<section class="register-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card register-card">
+                    <div class="card-header">
+                        <h2>Register as Organization/NGO</h2>
+                        <p>Register your organization to coordinate volunteer efforts</p>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('register_organization') }}" method="POST" enctype="multipart/form-data">
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label for="org_name" class="form-label">Organization Name *</label>
+                                    <input type="text" class="form-control" id="org_name" name="org_name" required>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label">Official Email Address *</label>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="phone" class="form-label">Contact Number *</label>
+                                    <input type="tel" class="form-control" id="phone" name="phone" required>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="password" class="form-label">Password *</label>
+                                    <input type="password" class="form-control" id="password" name="password" required>
+                                    <small class="text-muted">Minimum 8 characters with at least one number and one special character</small>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="confirm_password" class="form-label">Confirm Password *</label>
+                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="website" class="form-label">Website</label>
+                                    <input type="url" class="form-control" id="website" name="website" placeholder="https://www.example.org">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="location" class="form-label">Headquarters Location *</label>
+                                    <input type="text" class="form-control" id="location" name="location" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Organization Details</label>
+                                <div class="verification-box">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="org_type" class="form-label">Organization Type *</label>
+                                            <select class="form-select" id="org_type" name="org_type" required>
+                                                <option value="">Select Type</option>
+                                                <option value="ngo">Non-Governmental Organization (NGO)</option>
+                                                <option value="nonprofit">Non-Profit Organization</option>
+                                                <option value="educational">Educational Institution</option>
+                                                <option value="healthcare">Healthcare Organization</option>
+                                                <option value="corporate">Corporate Entity</option>
+                                                <option value="government">Government Body</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="reg_number" class="form-label">Registration Number *</label>
+                                            <input type="text" class="form-control" id="reg_number" name="reg_number" required>
+                                            <small class="text-muted">NGO registration, trust deed, or business registration number</small>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="reg_document" class="form-label">Upload Registration Certificate (PDF) *</label>
+                                        <input type="file" class="form-control" id="reg_document" name="reg_document" accept=".pdf" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Volunteer Domains</label>
+                                <div class="skills-box">
+                                    <p>Select the areas in which your organization can provide volunteer assistance:</p>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="domain_visual" name="domains[]" value="visual_assistance">
+                                                <label class="form-check-label" for="domain_visual">Visual Assistance</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="domain_hearing" name="domains[]" value="hearing_assistance">
+                                                <label class="form-check-label" for="domain_hearing">Hearing Assistance</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="domain_mobility" name="domains[]" value="mobility_support">
+                                                <label class="form-check-label" for="domain_mobility">Mobility Support</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-md-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="domain_speech" name="domains[]" value="speech_assistance">
+                                                <label class="form-check-label" for="domain_speech">Speech Assistance</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="domain_cognitive" name="domains[]" value="cognitive_support">
+                                                <label class="form-check-label" for="domain_cognitive">Cognitive Support</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="domain_emotional" name="domains[]" value="emotional_support">
+                                                <label class="form-check-label" for="domain_emotional">Emotional Support</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="terms" name="terms" required>
+                                    <label class="form-check-label" for="terms">
+                                        I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms of Service</a> and <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">Privacy Policy</a> *
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">Register Organization</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer text-center">
+                        <p>Already registered? <a href="{{ url_for('login') }}">Login here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Terms Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="termsModalLabel">Terms of Service</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>1. Organization Responsibilities</h6>
+                <p>By registering your organization, you agree to:</p>
+                <ul>
+                    <li>Verify and train all volunteers associated with your organization</li>
+                    <li>Ensure quality and ethical standards in all volunteer activities</li>
+                    <li>Maintain proper records of volunteer activities</li>
+                    <li>Follow all applicable laws and regulations</li>
+                </ul>
+                
+                <h6>2. Verification Process</h6>
+                <p>All organizations must complete our verification process for safety purposes. This includes organization registration verification and potentially additional checks depending on the type of assistance provided.</p>
+                
+                <h6>3. Code of Conduct</h6>
+                <p>Organizations and their volunteers must adhere to our code of conduct, which prohibits discrimination, harassment, or any form of inappropriate behavior.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Privacy Modal -->
+<div class="modal fade" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="privacyModalLabel">Privacy Policy</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>1. Information We Collect</h6>
+                <p>We collect organization information including name, contact details, location, and registration documents for verification purposes.</p>
+                
+                <h6>2. How We Use Your Information</h6>
+                <p>Your information is used to:</p>
+                <ul>
+                    <li>Verify your organization's legitimacy</li>
+                    <li>Match your organization with appropriate help requests</li>
+                    <li>Contact you regarding volunteer opportunities</li>
+                    <li>Ensure the safety of our users</li>
+                </ul>
+                
+                <h6>3. Security Measures</h6>
+                <p>We implement strict security measures to protect your organization's information and comply with all applicable data protection laws.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

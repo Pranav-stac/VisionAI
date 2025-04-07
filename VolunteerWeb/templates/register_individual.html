@@ -1,0 +1,313 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<section class="register-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card register-card">
+                    <div class="card-header">
+                        <h2>Register as Individual Volunteer</h2>
+                        <p>Fill in your details to join our volunteer network</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="registration-form">
+                            <form id="registrationForm" class="needs-validation" novalidate enctype="multipart/form-data">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="fullName" name="fullName" placeholder=" " required>
+                                    <label for="fullName">Full Name</label>
+                                    <div class="invalid-feedback">Please enter your full name</div>
+                                </div>
+
+                                <div class="form-floating mb-3">
+                                    <input type="email" class="form-control" id="email" name="email" placeholder=" " required>
+                                    <label for="email">Email address</label>
+                                    <div class="invalid-feedback">Please enter a valid email address</div>
+                                </div>
+
+                                <div class="form-floating mb-3">
+                                    <input type="password" class="form-control" id="password" name="password" placeholder=" " required>
+                                    <label for="password">Password</label>
+                                    <div class="password-strength"></div>
+                                    <div class="invalid-feedback">Password must be at least 8 characters</div>
+                                </div>
+
+                                <div class="form-floating mb-4">
+                                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder=" " required>
+                                    <label for="confirmPassword">Confirm Password</label>
+                                    <div class="invalid-feedback">Passwords do not match</div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="phone" class="form-label">Phone Number *</label>
+                                        <input type="tel" class="form-control" id="phone" name="phone" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="location" class="form-label">City/Location *</label>
+                                        <input type="text" class="form-control" id="location" name="location" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Verification Documents *</label>
+                                    <div class="verification-box">
+                                        <p>We need to verify your identity to ensure the safety of our users. Please provide:</p>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="id_type" class="form-label">ID Type *</label>
+                                                <select class="form-select" id="id_type" name="id_type" required>
+                                                    <option value="">Select ID Type</option>
+                                                    <option value="aadhar">Aadhar Card</option>
+                                                    <option value="passport">Passport</option>
+                                                    <option value="driving_license">Driving License</option>
+                                                    <option value="voter_id">Voter ID</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="id_number" class="form-label">ID Number *</label>
+                                                <input type="text" class="form-control" id="id_number" name="id_number" required>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="id_document" class="form-label">Upload ID Document (JPG, PNG or PDF) *</label>
+                                            <input type="file" class="form-control" id="id_document" name="id_document" accept=".jpg,.jpeg,.png,.pdf" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label class="form-label mb-3">I can help with: (Select all that apply)</label>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="visual_assistance" name="skills[]" value="visual_assistance">
+                                                <label class="form-check-label" for="visual_assistance">
+                                                    Visual Assistance
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="hearing_assistance" name="skills[]" value="hearing_assistance">
+                                                <label class="form-check-label" for="hearing_assistance">
+                                                    Hearing Assistance
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="mobility_support" name="skills[]" value="mobility_support">
+                                                <label class="form-check-label" for="mobility_support">
+                                                    Mobility Support
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="speech_assistance" name="skills[]" value="speech_assistance">
+                                                <label class="form-check-label" for="speech_assistance">
+                                                    Speech Assistance
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="cognitive_support" name="skills[]" value="cognitive_support">
+                                                <label class="form-check-label" for="cognitive_support">
+                                                    Cognitive Support
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="emotional_support" name="skills[]" value="emotional_support">
+                                                <label class="form-check-label" for="emotional_support">
+                                                    Emotional Support
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="terms" name="terms" required>
+                                        <label class="form-check-label" for="terms">
+                                            I agree to the <a href="#" class="text-primary" data-bs-toggle="modal" data-bs-target="#termsModal">Terms of Service</a> and 
+                                            <a href="#" class="text-primary" data-bs-toggle="modal" data-bs-target="#privacyModal">Privacy Policy</a>
+                                        </label>
+                                        <div class="invalid-feedback">
+                                            You must agree to the terms and conditions
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-primary btn-lg register-btn" style="z-index: 10;">
+                                        Register
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="card-footer text-center">
+                        <p class="mb-0">Already have an account? <a href="{{ url_for('login') }}" class="text-primary">Login here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Terms Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="termsModalLabel">Terms of Service</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>1. Volunteer Responsibilities</h6>
+                <p>By registering as a volunteer, you agree to:</p>
+                <ul>
+                    <li>Provide assistance to the best of your abilities</li>
+                    <li>Respect the privacy and dignity of those you help</li>
+                    <li>Follow safety guidelines and protocols</li>
+                    <li>Communicate promptly regarding your availability</li>
+                </ul>
+                
+                <h6>2. Verification Process</h6>
+                <p>All volunteers must complete our verification process for safety purposes. This includes ID verification and potentially background checks depending on the type of assistance provided.</p>
+                
+                <h6>3. Code of Conduct</h6>
+                <p>Volunteers must adhere to our code of conduct, which prohibits discrimination, harassment, or any form of inappropriate behavior.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Privacy Modal -->
+<div class="modal fade" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="privacyModalLabel">Privacy Policy</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>1. Information We Collect</h6>
+                <p>We collect personal information including name, contact details, location, and identification documents for verification purposes.</p>
+                
+                <h6>2. How We Use Your Information</h6>
+                <p>Your information is used to:</p>
+                <ul>
+                    <li>Verify your identity</li>
+                    <li>Match you with appropriate help requests</li>
+                    <li>Contact you regarding volunteer opportunities</li>
+                    <li>Ensure the safety of our users</li>
+                </ul>
+                
+                <h6>3. Security Measures</h6>
+                <p>We implement strict security measures to protect your personal information and comply with all applicable data protection laws.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-floating {
+        position: relative;
+        margin-bottom: 1rem;
+    }
+
+    .form-control {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--text-bright);
+        backdrop-filter: blur(10px);
+    }
+
+    .form-control:focus {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.25rem rgba(var(--primary-rgb), 0.25);
+        color: var(--text-bright);
+    }
+
+    .form-floating > label {
+        color: var(--text-secondary);
+    }
+
+    .form-floating > .form-control:focus ~ label,
+    .form-floating > .form-control:not(:placeholder-shown) ~ label {
+        color: var(--primary);
+        transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+    }
+
+    .password-strength {
+        height: 4px;
+        margin-top: 0.5rem;
+        border-radius: 2px;
+        background: rgba(255, 255, 255, 0.1);
+        overflow: hidden;
+    }
+
+    .password-strength::before {
+        content: '';
+        display: block;
+        height: 100%;
+        width: 0;
+        transition: width 0.3s ease;
+        background: var(--primary);
+    }
+
+    .register-btn {
+        position: relative;
+        cursor: pointer;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        border: none;
+        color: var(--text-bright) !important;
+        font-weight: 600;
+        padding: 12px 30px;
+        transition: all 0.3s ease;
+    }
+
+    .register-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 99, 255, 0.4);
+    }
+
+    .register-btn:active {
+        transform: translateY(0);
+    }
+
+    /* Ensure form elements are above background elements */
+    .card-body {
+        position: relative;
+        z-index: 2;
+    }
+
+    form {
+        position: relative;
+        z-index: 2;
+    }
+
+    .form-control, 
+    .form-select, 
+    .form-check-input,
+    .btn {
+        position: relative;
+        z-index: 2;
+    }
+</style>
+{% endblock %}

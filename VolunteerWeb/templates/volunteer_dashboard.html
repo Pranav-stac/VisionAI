@@ -1,0 +1,635 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<section class="dashboard-section">
+    <!-- Mobile header only visible on small screens -->
+    <div class="mobile-header">
+        <div class="mobile-logo">Vision AI</div>
+        <button class="mobile-menu-toggle" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+    
+    <!-- Sidebar overlay -->
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="dashboard-sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="user-avatar">
+                    {% if volunteer.profile_image %}
+                    <img src="{{ volunteer.profile_image }}" alt="{{ volunteer.fullName }}" class="avatar-img">
+                    {% else %}
+                    <div class="avatar-placeholder">{{ volunteer.fullName|default('User')|truncate(1, true, '') }}</div>
+                    {% endif %}
+                </div>
+                
+                <h3 class="user-name">{{ volunteer.fullName }}</h3>
+                
+                <div class="verification-badge {% if volunteer.verification_status == 'verified' %}verified{% endif %}">
+                    <i class="fas {% if volunteer.verification_status == 'verified' %}fa-check-circle{% elif volunteer.verification_status == 'pending' %}fa-clock{% else %}fa-times-circle{% endif %}"></i>
+                    {{ volunteer.verification_status|capitalize|default('Unverified') }}
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="{{ url_for('volunteer_dashboard') }}" class="sidebar-nav-item active">
+                    <i class="fas fa-columns"></i> Dashboard
+                </a>
+                <a href="#" class="sidebar-nav-item">
+                    <i class="fas fa-clipboard-list"></i> Help Requests
+                </a>
+                <a href="#" class="sidebar-nav-item">
+                    <i class="fas fa-calendar-alt"></i> Schedule
+                </a>
+                <a href="#" class="sidebar-nav-item">
+                    <i class="fas fa-trophy"></i> Achievements
+                </a>
+                <a href="{{ url_for('profile', user_type='volunteer', user_id=session['user']['localId']) }}" class="sidebar-nav-item">
+                    <i class="fas fa-user-edit"></i> Edit Profile
+                </a>
+            </nav>
+            
+            <div class="sidebar-stats">
+                <div class="stat-group">
+                    <div class="stat-label">Rating</div>
+                    <div class="star-rating">
+                        <i class="fas fa-star"></i>
+                        <span class="stat-value">{{ volunteer.rating|default('5.0') }}</span>
+                    </div>
+                </div>
+                
+                <div class="stat-group">
+                    <div class="stat-label">Completions</div>
+                    <div class="stat-value">{{ volunteer.total_completions|default(0) }}</div>
+                </div>
+                
+                <div class="stat-group">
+                    <div class="stat-label">Active</div>
+                    <div class="stat-value">{{ volunteer.active_assignments|default(0) }}</div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main Content Area -->
+        <main class="dashboard-main">
+            <div class="dashboard-header">
+                <div class="welcome-block">
+                    <h1>Welcome, {{ volunteer.fullName }}</h1>
+                    <p>Your kindness makes a difference. Here's what needs your help today.</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-primary pulse-btn" data-bs-toggle="modal" data-bs-target="#scheduleEventModal">
+                        <i class="fas fa-calendar-plus"></i> Schedule Event
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Stats Row -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(89, 95, 255, 0.1); color: var(--vibrant-blue)">
+                        <i class="fas fa-hands-helping"></i>
+                    </div>
+                    <div class="stat-info">
+                        <p class="stat-value">{{ requests|length }}</p>
+                        <p class="stat-label">Help Requests</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(255, 95, 95, 0.1); color: var(--danger)">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <p class="stat-value">{{ urgent_count|default(0) }}</p>
+                        <p class="stat-label">Urgent Requests</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(95, 255, 195, 0.1); color: var(--success)">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <div class="stat-info">
+                        <p class="stat-value">{{ volunteer.active_assignments|default(0) }}</p>
+                        <p class="stat-label">Active Assignments</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(255, 175, 95, 0.1); color: var(--warning)">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-info">
+                        <p class="stat-value">{{ volunteer.rating|default('5.0') }}</p>
+                        <p class="stat-label">Average Rating</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Content Grid - Help requests and user info side by side -->
+            <div class="dashboard-content">
+                <!-- Help Requests Section -->
+                <div class="content-section">
+                    <div class="section-header">
+                        <h2>Help Requests</h2>
+                        <div class="filter-tabs">
+                            <button class="filter-tab active" onclick="filterRequests('all')">
+                                <i class="fas fa-list"></i> All
+                            </button>
+                            <button class="filter-tab" onclick="filterRequests('urgent')">
+                                <i class="fas fa-exclamation-circle"></i> Urgent
+                            </button>
+                            <button class="filter-tab" onclick="filterRequests('nearby')">
+                                <i class="fas fa-map-marker-alt"></i> Nearby
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="requests-container">
+                        {% if requests %}
+                        <div class="requests-grid">
+                            {% for request_id, request in requests.items() %}
+                            <div class="request-card" data-priority="{{ request.priority|default('low') }}" data-distance="{{ request.distance|default(5) }}">
+                                <div class="request-header">
+                                    <h3 class="request-title">{{ request.title }}</h3>
+                                    <div class="request-priority priority-{{ request.priority|default('low') }}">
+                                        {{ request.priority|default('Low') }}
+                                    </div>
+                                </div>
+                                
+                                <div class="request-body">
+                                    <p class="request-description">{{ request.description|truncate(150) }}</p>
+                                    
+                                    <div class="request-meta">
+                                        <div class="meta-item location">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            {{ request.location|default('Not specified') }}
+                                        </div>
+                                        
+                                        <div class="meta-item timing">
+                                            <i class="fas fa-clock"></i>
+                                            {{ request.estimated_time|default('30 mins') }}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {% if request.skills %}
+                                <div class="request-skills">
+                                    <h5>Skills Needed</h5>
+                                    <div class="skills-grid">
+                                        {% for skill in request.skills %}
+                                        <span class="skill-badge">{{ skill }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                <div class="request-actions">
+                                    <button class="btn btn-primary" onclick="viewDetails('{{ request_id }}')">
+                                        <i class="fas fa-info-circle"></i> View Details
+                                    </button>
+                                    <button class="btn btn-success" onclick="acceptRequest('{{ request_id }}')" data-request-id="{{ request_id }}">
+                                        <i class="fas fa-check"></i> Accept
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-clipboard-list empty-state-icon"></i>
+                            <h4>No Help Requests Available</h4>
+                            <p>There are currently no help requests that match your skills and preferences. Check back later or adjust your preferences to see more opportunities.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- User Profile Section -->
+                <div class="content-section">
+                    <div class="section-header">
+                        <h2>Your Profile</h2>
+                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addSkillModal">
+                            <i class="fas fa-plus"></i> Add Skill
+                        </button>
+                    </div>
+                    
+                    <div class="profile-content">
+                        <!-- Skills Section -->
+                        <div class="profile-skills">
+                            <h3>Your Skills</h3>
+                            {% if volunteer.skills %}
+                            <div class="skills-grid">
+                                {% for skill in volunteer.skills %}
+                                <div class="skill-badge">{{ skill }}</div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <p class="empty-message">No skills added yet. Add skills to help match you with suitable requests.</p>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Upcoming Events -->
+                        <div class="profile-events">
+                            <h3>Upcoming Events</h3>
+                            {% if volunteer.events %}
+                            <div class="events-list">
+                                {% for event in volunteer.events %}
+                                <div class="event-item">
+                                    <div class="event-date">
+                                        {% if event.date %}
+                                            {% set event_date = event.date|string|datetime %}
+                                            <span class="event-day">{{ event_date.strftime('%d') }}</span>
+                                            <span class="event-month">{{ event_date.strftime('%b') }}</span>
+                                        {% else %}
+                                            <span class="event-day">--</span>
+                                            <span class="event-month">---</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="event-details">
+                                        <h4 class="event-title">{{ event.title }}</h4>
+                                        <p class="event-time"><i class="fas fa-clock"></i> {{ event.time }}</p>
+                                        <p class="event-location"><i class="fas fa-map-marker-alt"></i> {{ event.location }}</p>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <p class="empty-message">No upcoming events scheduled. Use the Schedule Event button to add events.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</section>
+
+<!-- Add Skill Modal -->
+<div class="modal fade" id="addSkillModal" tabindex="-1" aria-labelledby="addSkillModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addSkillModalLabel">Add a New Skill</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addSkillForm">
+                    <div class="form-group">
+                        <label for="skillName" class="form-label">Skill Name</label>
+                        <input type="text" class="form-control" id="skillName" placeholder="e.g., Reading, Navigation assistance, etc." required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="skillLevel" class="form-label">Proficiency Level</label>
+                        <select class="form-select" id="skillLevel" required>
+                            <option value="" selected disabled>Select proficiency level</option>
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                            <option value="expert">Expert</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addSkill()">Add Skill</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Schedule Event Modal -->
+<div class="modal fade" id="scheduleEventModal" tabindex="-1" aria-labelledby="scheduleEventModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="scheduleEventModalLabel">Schedule a New Event</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="scheduleEventForm">
+                    <div class="form-group">
+                        <label for="eventTitle" class="form-label">Event Title</label>
+                        <input type="text" class="form-control" id="eventTitle" placeholder="Enter event title" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="eventDate" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="eventDate" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="eventTime" class="form-label">Time</label>
+                        <input type="time" class="form-control" id="eventTime" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="eventLocation" class="form-label">Location</label>
+                        <input type="text" class="form-control" id="eventLocation" placeholder="Enter location" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="eventDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="eventDescription" rows="3" placeholder="Enter event description"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="scheduleEvent()">Schedule Event</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notification Container -->
+<div id="notificationContainer"></div>
+
+<!-- Add this at the end of your template -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/volunteer_dashboard.css') }}">
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        
+        sidebar.classList.toggle('show');
+        overlay.classList.toggle('show');
+    }
+    
+    function filterRequests(filter) {
+        const tabs = document.querySelectorAll('.filter-tab');
+        tabs.forEach(tab => tab.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        
+        const requestCards = document.querySelectorAll('.request-card');
+        
+        requestCards.forEach(card => {
+            if (filter === 'all') {
+                card.style.display = '';
+                setTimeout(() => card.style.opacity = 1, 10);
+            } else if (filter === 'urgent' && card.dataset.priority === 'urgent' || card.dataset.priority === 'high') {
+                card.style.display = '';
+                setTimeout(() => card.style.opacity = 1, 10);
+            } else if (filter === 'nearby' && card.dataset.distance && parseInt(card.dataset.distance) <= 10) {
+                card.style.display = '';
+                setTimeout(() => card.style.opacity = 1, 10);
+            } else {
+                card.style.opacity = 0;
+                setTimeout(() => card.style.display = 'none', 300);
+            }
+        });
+    }
+    
+    function viewDetails(requestId) {
+        window.location.href = `/request/${requestId}`;
+    }
+    
+    function acceptRequest(requestId) {
+        if (!confirm('Are you sure you want to accept this request?')) {
+            return;
+        }
+
+        // Find and disable the accept button
+        const button = document.querySelector(`.request-card[data-request-id="${requestId}"] .btn-success`);
+        if (button) {
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Accepting...';
+        }
+
+        // Make the API call
+        fetch(`/accept-request/${requestId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Find the request card
+                const card = document.querySelector(`.request-card[data-request-id="${requestId}"]`);
+                if (card) {
+                    // Add acceptance animation
+                    card.classList.add('request-accepted');
+                    card.style.transform = 'translateX(100px)';
+                    card.style.opacity = '0';
+                    
+                    // Remove card after animation
+                    setTimeout(() => {
+                        card.remove();
+                        // Update counters
+                        updateRequestCounters();
+                    }, 500);
+
+                    // Show success notification
+                    showNotification('success', 'Request Accepted', 'You have successfully accepted this help request.');
+                    
+                    // Close modal if open
+                    const modal = document.getElementById('requestDetailsModal');
+                    if (modal) {
+                        const bootstrapModal = bootstrap.Modal.getInstance(modal);
+                        if (bootstrapModal) {
+                            bootstrapModal.hide();
+                        }
+                    }
+                }
+            } else {
+                // Reset button state on error
+                if (button) {
+                    button.disabled = false;
+                    button.innerHTML = '<i class="fas fa-check"></i> Accept';
+                }
+                showNotification('error', 'Error', data.message || 'An error occurred while accepting the request.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // Reset button state on error
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-check"></i> Accept';
+            }
+            showNotification('error', 'Error', 'An error occurred while accepting the request.');
+        });
+    }
+    
+    function addSkill() {
+        const skillName = document.getElementById('skillName').value.trim();
+        const skillLevel = document.getElementById('skillLevel').value;
+        
+        if (!skillName || !skillLevel) {
+            showNotification('warning', 'Missing Information', 'Please provide both skill name and proficiency level.');
+            return;
+        }
+        
+        fetch('/add-skill', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                skill_name: skillName,
+                skill_level: skillLevel
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('success', 'Skill Added', 'Your new skill has been added successfully.');
+                // Close modal and reset form
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addSkillModal'));
+                modal.hide();
+                document.getElementById('addSkillForm').reset();
+                
+                // Add the skill to the UI without reloading
+                const skillsGrid = document.querySelector('.skills-grid');
+                const emptyMessage = document.querySelector('.profile-skills .empty-message');
+                
+                if (emptyMessage) {
+                    emptyMessage.remove();
+                    const skillsGridElement = document.createElement('div');
+                    skillsGridElement.className = 'skills-grid';
+                    document.querySelector('.profile-skills').appendChild(skillsGridElement);
+                }
+                
+                const skillBadge = document.createElement('div');
+                skillBadge.className = 'skill-badge';
+                skillBadge.textContent = skillName;
+                skillsGrid.appendChild(skillBadge);
+            } else {
+                showNotification('error', 'Error', data.message || 'An error occurred while adding the skill.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('error', 'Error', 'An error occurred while adding the skill.');
+        });
+    }
+    
+    function scheduleEvent() {
+        const eventTitle = document.getElementById('eventTitle').value.trim();
+        const eventDate = document.getElementById('eventDate').value;
+        const eventTime = document.getElementById('eventTime').value;
+        const eventLocation = document.getElementById('eventLocation').value.trim();
+        const eventDescription = document.getElementById('eventDescription').value.trim();
+        
+        if (!eventTitle || !eventDate || !eventTime || !eventLocation) {
+            showNotification('warning', 'Missing Information', 'Please fill out all required fields.');
+            return;
+        }
+        
+        fetch('/schedule-event', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                title: eventTitle,
+                date: eventDate,
+                time: eventTime,
+                location: eventLocation,
+                description: eventDescription
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('success', 'Event Scheduled', 'Your event has been scheduled successfully.');
+                // Close modal and reset form
+                const modal = bootstrap.Modal.getInstance(document.getElementById('scheduleEventModal'));
+                modal.hide();
+                document.getElementById('scheduleEventForm').reset();
+                
+                // Refresh the page to show the new event
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showNotification('error', 'Error', data.message || 'An error occurred while scheduling the event.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('error', 'Error', 'An error occurred while scheduling the event.');
+        });
+    }
+    
+    function showNotification(type, title, message) {
+        const container = document.getElementById('notificationContainer');
+        
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        
+        notification.innerHTML = `
+            <div class="notification-icon">
+                <i class="fas ${
+                    type === 'success' ? 'fa-check-circle' : 
+                    type === 'error' ? 'fa-times-circle' : 
+                    type === 'warning' ? 'fa-exclamation-triangle' : 
+                    'fa-info-circle'
+                }"></i>
+            </div>
+            <div class="notification-content">
+                <div class="notification-title">${title}</div>
+                <div class="notification-message">${message}</div>
+            </div>
+            <button class="notification-close" onclick="closeNotification(this.parentElement)">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        container.appendChild(notification);
+        
+        // Add the show class after a small delay to trigger the animation
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+        
+        // Auto-close after 5 seconds
+        setTimeout(() => {
+            closeNotification(notification);
+        }, 5000);
+    }
+    
+    function closeNotification(notification) {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            notification.remove();
+        }, 500);
+    }
+    
+    function updateRequestCounters() {
+        const helpRequestsCount = document.querySelector('.stat-card:nth-child(1) .stat-value');
+        const urgentRequestsCount = document.querySelector('.stat-card:nth-child(2) .stat-value');
+        const activeAssignmentsCount = document.querySelector('.stat-card:nth-child(3) .stat-value');
+
+        if (helpRequestsCount) {
+            const currentCount = parseInt(helpRequestsCount.textContent);
+            helpRequestsCount.textContent = Math.max(0, currentCount - 1);
+        }
+
+        if (urgentRequestsCount) {
+            const currentCount = parseInt(urgentRequestsCount.textContent);
+            urgentRequestsCount.textContent = Math.max(0, currentCount - 1);
+        }
+
+        if (activeAssignmentsCount) {
+            const currentCount = parseInt(activeAssignmentsCount.textContent);
+            activeAssignmentsCount.textContent = currentCount + 1;
+        }
+    }
+</script>
+{% endblock %}

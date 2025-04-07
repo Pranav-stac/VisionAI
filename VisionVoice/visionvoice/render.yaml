@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: knowwiz-vision-voice
+    env: docker
+    repo: https://github.com/your-username/your-repo-name
+    branch: main
+    buildCommand: docker build -t knowwiz-vision-voice .
+    startCommand: docker run -p $PORT:80 knowwiz-vision-voice
+    envVars:
+      - key: REACT_APP_GEMINI_API_KEY
+        sync: false
+    healthCheckPath: /
+    autoDeploy: true 

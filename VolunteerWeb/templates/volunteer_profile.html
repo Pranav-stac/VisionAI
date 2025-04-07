@@ -1,0 +1,620 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<section class="profile-section">
+    <div class="container">
+        <div class="profile-header">
+            <h1>Your Profile</h1>
+            <p class="lead">Manage your volunteer information and preferences</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="profile-sidebar">
+                    <div class="profile-image">
+                        <i class="fas fa-user-circle"></i>
+                        <button class="btn btn-sm btn-outline-primary upload-photo-btn">Change Photo</button>
+                    </div>
+                    
+                    <div class="profile-status">
+                        <span class="verification-badge {% if volunteer.verification_status == 'verified' %}badge-verified{% elif volunteer.verification_status == 'pending' %}badge-pending{% else %}badge-rejected{% endif %}">
+                            <i class="fas {% if volunteer.verification_status == 'verified' %}fa-check-circle{% elif volunteer.verification_status == 'pending' %}fa-clock{% else %}fa-times-circle{% endif %}"></i>
+                            {{ volunteer.verification_status|capitalize }}
+                        </span>
+                        
+                        {% if volunteer.verification_status == 'pending' %}
+                            <p class="verification-message">Your account is pending verification. We'll notify you once the process is complete.</p>
+                        {% elif volunteer.verification_status == 'rejected' %}
+                            <p class="verification-message">Your verification was not approved. Please contact support for more information.</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Requests Completed</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Hours Volunteered</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-8">
+                <div class="profile-content">
+                    <div class="profile-card">
+                        <div class="profile-card-header">
+                            <h3>Personal Information</h3>
+                            <button class="btn btn-sm btn-outline-primary edit-btn" data-section="personal">Edit</button>
+                        </div>
+                        <div class="profile-card-body">
+                            <div class="profile-info-section" id="personal-info-view">
+                                <div class="row mb-3">
+                                    <div class="col-md-4 info-label">Full Name</div>
+                                    <div class="col-md-8 info-value">{{ volunteer.name }}</div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-4 info-label">Email Address</div>
+                                    <div class="col-md-8 info-value">{{ volunteer.email }}</div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-4 info-label">Phone Number</div>
+                                    <div class="col-md-8 info-value">{{ volunteer.phone }}</div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-4 info-label">Location</div>
+                                    <div class="col-md-8 info-value">{{ volunteer.location|default('Not specified') }}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="profile-info-section d-none" id="personal-info-edit">
+                                <form>
+                                    <div class="mb-3">
+                                        <label for="edit-name" class="form-label">Full Name</label>
+                                        <input type="text" class="form-control" id="edit-name" value="{{ volunteer.name }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="edit-email" class="form-label">Email Address</label>
+                                        <input type="email" class="form-control" id="edit-email" value="{{ volunteer.email }}" disabled>
+                                        <small class="text-muted">Email address cannot be changed</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="edit-phone" class="form-label">Phone Number</label>
+                                        <input type="tel" class="form-control" id="edit-phone" value="{{ volunteer.phone }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="edit-location" class="form-label">Location</label>
+                                        <input type="text" class="form-control" id="edit-location" value="{{ volunteer.location|default('') }}">
+                                    </div>
+                                    <div class="text-end">
+                                        <button type="button" class="btn btn-outline-secondary cancel-btn" data-section="personal">Cancel</button>
+                                        <button type="button" class="btn btn-primary save-btn" data-section="personal">Save Changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-card">
+                        <div class="profile-card-header">
+                            <h3>Skills & Preferences</h3>
+                            <button class="btn btn-sm btn-outline-primary edit-btn" data-section="skills">Edit</button>
+                        </div>
+                        <div class="profile-card-body">
+                            <div class="profile-info-section" id="skills-info-view">
+                                <h5>I can help with:</h5>
+                                <div class="skills-tags">
+                                    {% if volunteer.skills %}
+                                        {% for skill in volunteer.skills %}
+                                            <span class="skill-tag">{{ skill|replace('_', ' ')|capitalize }}</span>
+                                        {% endfor %}
+                                    {% else %}
+                                        <p class="text-muted">No skills specified yet</p>
+                                    {% endif %}
+                                </div>
+                                
+                                <h5 class="mt-4">Availability:</h5>
+                                <div class="availability-display">
+                                    {% if volunteer.availability %}
+                                        <table class="table availability-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Day</th>
+                                                    <th>Morning</th>
+                                                    <th>Afternoon</th>
+                                                    <th>Evening</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                                                    <tr>
+                                                        <td>{{ day }}</td>
+                                                        <td>
+                                                            {% if day.lower() in volunteer.availability and 'morning' in volunteer.availability[day.lower()] %}
+                                                                <i class="fas fa-check text-success"></i>
+                                                            {% else %}
+                                                                <i class="fas fa-times text-danger"></i>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>
+                                                            {% if day.lower() in volunteer.availability and 'afternoon' in volunteer.availability[day.lower()] %}
+                                                                <i class="fas fa-check text-success"></i>
+                                                            {% else %}
+                                                                <i class="fas fa-times text-danger"></i>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>
+                                                            {% if day.lower() in volunteer.availability and 'evening' in volunteer.availability[day.lower()] %}
+                                                                <i class="fas fa-check text-success"></i>
+                                                            {% else %}
+                                                                <i class="fas fa-times text-danger"></i>
+                                                            {% endif %}
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    {% else %}
+                                        <p class="text-muted">No availability specified yet</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="profile-info-section d-none" id="skills-info-edit">
+                                <form>
+                                    <div class="mb-4">
+                                        <label class="form-label">I can help with: (Select all that apply)</label>
+                                        <div class="skills-checkboxes">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-check mb-2">
+                                                        <input class="form-check-input" type="checkbox" id="skill-visual" name="skills[]" value="visual_assistance" {% if volunteer.skills and 'visual_assistance' in volunteer.skills %}checked{% endif %}>
+                                                        <label class="form-check-label" for="skill-visual">Visual Assistance</label>
+                                                    </div>
+                                                    <div class="form-check mb-2">
+                                                        <input class="form-check-input" type="checkbox" id="skill-hearing" name="skills[]" value="hearing_assistance" {% if volunteer.skills and 'hearing_assistance' in volunteer.skills %}checked{% endif %}>
+                                                        <label class="form-check-label" for="skill-hearing">Hearing Assistance</label>
+                                                    </div>
+                                                    <div class="form-check mb-2">
+                                                        <input class="form-check-input" type="checkbox" id="skill-mobility" name="skills[]" value="mobility_support" {% if volunteer.skills and 'mobility_support' in volunteer.skills %}checked{% endif %}>
+                                                        <label class="form-check-label" for="skill-mobility">Mobility Support</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-check mb-2">
+                                                        <input class="form-check-input" type="checkbox" id="skill-speech" name="skills[]" value="speech_assistance" {% if volunteer.skills and 'speech_assistance' in volunteer.skills %}checked{% endif %}>
+                                                        <label class="form-check-label" for="skill-speech">Speech Assistance</label>
+                                                    </div>
+                                                    <div class="form-check mb-2">
+                                                        <input class="form-check-input" type="checkbox" id="skill-cognitive" name="skills[]" value="cognitive_support" {% if volunteer.skills and 'cognitive_support' in volunteer.skills %}checked{% endif %}>
+                                                        <label class="form-check-label" for="skill-cognitive">Cognitive Support</label>
+                                                    </div>
+                                                    <div class="form-check mb-2">
+                                                        <input class="form-check-input" type="checkbox" id="skill-emotional" name="skills[]" value="emotional_support" {% if volunteer.skills and 'emotional_support' in volunteer.skills %}checked{% endif %}>
+                                                        <label class="form-check-label" for="skill-emotional">Emotional Support</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <label class="form-label">Availability:</label>
+                                        <table class="table availability-edit-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Day</th>
+                                                    <th>Morning</th>
+                                                    <th>Afternoon</th>
+                                                    <th>Evening</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                                                    <tr>
+                                                        <td>{{ day }}</td>
+                                                        <td>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" id="{{ day.lower() }}-morning" name="availability[{{ day.lower() }}][]" value="morning" {% if volunteer.availability and day.lower() in volunteer.availability and 'morning' in volunteer.availability[day.lower()] %}checked{% endif %}>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" id="{{ day.lower() }}-afternoon" name="availability[{{ day.lower() }}][]" value="afternoon" {% if volunteer.availability and day.lower() in volunteer.availability and 'afternoon' in volunteer.availability[day.lower()] %}checked{% endif %}>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" id="{{ day.lower() }}-evening" name="availability[{{ day.lower() }}][]" value="evening" {% if volunteer.availability and day.lower() in volunteer.availability and 'evening' in volunteer.availability[day.lower()] %}checked{% endif %}>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    <div class="text-end">
+                                        <button type="button" class="btn btn-outline-secondary cancel-btn" data-section="skills">Cancel</button>
+                                        <button type="button" class="btn btn-primary save-btn" data-section="skills">Save Changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-card">
+                        <div class="profile-card-header">
+                            <h3>Security & Notifications</h3>
+                            <button class="btn btn-sm btn-outline-primary edit-btn" data-section="security">Edit</button>
+                        </div>
+                        <div class="profile-card-body">
+                            <div class="profile-info-section" id="security-info-view">
+                                <div class="row mb-3">
+                                    <div class="col-md-4 info-label">Password</div>
+                                    <div class="col-md-8 info-value">••••••••</div>
+                                </div>
+                                
+                                <h5 class="mt-4">Notification Preferences:</h5>
+                                <div class="row mb-3">
+                                    <div class="col-md-4 info-label">Email Notifications</div>
+                                    <div class="col-md-8 info-value">
+                                        <i class="fas fa-check text-success"></i> Enabled
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-4 info-label">SMS Notifications</div>
+                                    <div class="col-md-8 info-value">
+                                        <i class="fas fa-times text-danger"></i> Disabled
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="profile-info-section d-none" id="security-info-edit">
+                                <form>
+                                    <div class="mb-4">
+                                        <label class="form-label">Change Password</label>
+                                        <div class="mb-3">
+                                            <input type="password" class="form-control" id="current-password" placeholder="Current Password">
+                                        </div>
+                                        <div class="mb-3">
+                                            <input type="password" class="form-control" id="new-password" placeholder="New Password">
+                                        </div>
+                                        <div class="mb-3">
+                                            <input type="password" class="form-control" id="confirm-new-password" placeholder="Confirm New Password">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <label class="form-label">Notification Preferences:</label>
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="email-notifications" checked>
+                                            <label class="form-check-label" for="email-notifications">
+                                                Email Notifications
+                                            </label>
+                                            <div class="text-muted">Receive email notifications about new help requests and updates</div>
+                                        </div>
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="sms-notifications">
+                                            <label class="form-check-label" for="sms-notifications">
+                                                SMS Notifications
+                                            </label>
+                                            <div class="text-muted">Receive text message alerts for urgent help requests</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="text-end">
+                                        <button type="button" class="btn btn-outline-secondary cancel-btn" data-section="security">Cancel</button>
+                                        <button type="button" class="btn btn-primary save-btn" data-section="security">Save Changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .profile-section {
+        padding: 50px 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .profile-header {
+        margin-bottom: 30px;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .profile-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 10px;
+    }
+    
+    .profile-sidebar {
+        background: rgba(30, 30, 40, 0.6);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        padding: 30px;
+        margin-bottom: 30px;
+        text-align: center;
+        position: relative;
+        z-index: 2;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .profile-sidebar:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    .profile-image {
+        position: relative;
+        margin-bottom: 25px;
+    }
+    
+    .profile-image i {
+        font-size: 6rem;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    }
+    
+    .upload-photo-btn {
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.85rem;
+        padding: 8px 16px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        border: none;
+        color: var(--text-bright);
+        box-shadow: 0 4px 15px rgba(108, 99, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .upload-photo-btn:hover {
+        transform: translateX(-50%) translateY(-2px);
+        box-shadow: 0 6px 20px rgba(108, 99, 255, 0.3);
+        color: var(--text-bright);
+    }
+    
+    .verification-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-bottom: 15px;
+    }
+    
+    .badge-verified {
+        background: rgba(46, 213, 115, 0.15);
+        color: #2ed573;
+        border: 1px solid rgba(46, 213, 115, 0.3);
+    }
+    
+    .badge-pending {
+        background: rgba(255, 171, 0, 0.15);
+        color: #ffab00;
+        border: 1px solid rgba(255, 171, 0, 0.3);
+    }
+    
+    .badge-rejected {
+        background: rgba(255, 71, 87, 0.15);
+        color: #ff4757;
+        border: 1px solid rgba(255, 71, 87, 0.3);
+    }
+    
+    .verification-badge i {
+        margin-right: 8px;
+    }
+    
+    .profile-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-top: 25px;
+    }
+    
+    .stat-item {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 15px;
+        transition: transform 0.3s ease;
+    }
+    
+    .stat-item:hover {
+        transform: translateY(-3px);
+    }
+    
+    .stat-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 5px;
+    }
+    
+    .stat-label {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+    
+    .profile-card {
+        background: rgba(30, 30, 40, 0.6);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        margin-bottom: 30px;
+        position: relative;
+        z-index: 2;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .profile-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    .profile-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .profile-card-header h3 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--primary);
+        margin-bottom: 0;
+    }
+    
+    .profile-card-body {
+        padding: 20px;
+    }
+    
+    .info-label {
+        color: var(--text-medium);
+        font-weight: 500;
+    }
+    
+    .info-value {
+        font-weight: 500;
+    }
+    
+    .availability-table, .availability-edit-table {
+        font-size: 0.9rem;
+    }
+    
+    .availability-table td, .availability-edit-table td {
+        vertical-align: middle;
+    }
+    
+    .availability-edit-table .form-check {
+        margin-bottom: 0;
+        display: flex;
+        justify-content: center;
+    }
+    
+    @media (max-width: 768px) {
+        .profile-card-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .profile-card-header .edit-btn {
+            margin-top: 10px;
+        }
+        
+        .info-label, .info-value {
+            text-align: left;
+        }
+        
+        .info-label {
+            margin-bottom: 5px;
+        }
+    }
+    
+    /* Add animated background shapes */
+    .shape {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.15;
+        z-index: 1;
+    }
+    
+    .shape-1 {
+        width: 400px;
+        height: 400px;
+        background: var(--primary);
+        top: 10%;
+        left: -100px;
+        animation: float 8s ease-in-out infinite;
+    }
+    
+    .shape-2 {
+        width: 300px;
+        height: 300px;
+        background: var(--secondary);
+        bottom: 10%;
+        right: -50px;
+        animation: float 10s ease-in-out infinite 1s;
+    }
+    
+    @keyframes float {
+        0%, 100% {
+            transform: translate(0, 0) rotate(0deg);
+        }
+        50% {
+            transform: translate(30px, 30px) rotate(15deg);
+        }
+    }
+</style>
+
+<!-- Add shapes to the profile section -->
+<div class="shape shape-1"></div>
+<div class="shape shape-2"></div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle edit buttons
+        const editButtons = document.querySelectorAll('.edit-btn');
+        const cancelButtons = document.querySelectorAll('.cancel-btn');
+        const saveButtons = document.querySelectorAll('.save-btn');
+        
+        editButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const section = this.getAttribute('data-section');
+                document.getElementById(`${section}-info-view`).classList.add('d-none');
+                document.getElementById(`${section}-info-edit`).classList.remove('d-none');
+            });
+        });
+        
+        cancelButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const section = this.getAttribute('data-section');
+                document.getElementById(`${section}-info-edit`).classList.add('d-none');
+                document.getElementById(`${section}-info-view`).classList.remove('d-none');
+            });
+        });
+        
+        saveButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const section = this.getAttribute('data-section');
+                
+                // In a real app, here you would send an AJAX request to update the data
+                alert(`Changes to ${section} saved successfully!`);
+                
+                document.getElementById(`${section}-info-edit`).classList.add('d-none');
+                document.getElementById(`${section}-info-view`).classList.remove('d-none');
+            });
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

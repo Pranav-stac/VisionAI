@@ -1,0 +1,894 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<section class="dashboard-section">
+    <div class="dashboard-main-container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header glass-effect">
+            <div class="dashboard-header-content">
+                <h1 class="dashboard-title">Welcome, {{ org.org_name }}</h1>
+                <p class="dashboard-subtitle">Manage your organization's help requests and volunteers here.</p>
+            </div>
+            <div class="dashboard-actions">
+                <button class="btn btn-primary pulse-btn" data-bs-toggle="modal" data-bs-target="#createRequestModal">
+                    <i class="fas fa-plus-circle"></i> Create Request
+                </button>
+                <a href="{{ url_for('profile', user_type='organization', user_id=session['user']['localId']) }}" class="btn btn-outline-primary">
+                    <i class="fas fa-building"></i> Organization Profile
+                </a>
+            </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="dashboard-stats-row">
+            <div class="stat-card help-requests">
+                <div class="stat-icon">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ requests|selectattr('status', 'equalto', 'pending')|list|length|default(0) }}</div>
+                    <div class="stat-label">Open Requests</div>
+                </div>
+            </div>
+            
+            <div class="stat-card active-requests">
+                <div class="stat-icon">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ requests|selectattr('status', 'equalto', 'assigned')|list|length|default(0) }}</div>
+                    <div class="stat-label">Assigned Requests</div>
+                </div>
+            </div>
+            
+            <div class="stat-card rating">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ requests|selectattr('status', 'equalto', 'completed')|list|length|default(0) }}</div>
+                    <div class="stat-label">Completed Jobs</div>
+                </div>
+            </div>
+            
+            <div class="stat-card urgent-requests">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ org.volunteers|default([])|length }}</div>
+                    <div class="stat-label">Active Volunteers</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Two Column Layout -->
+        <div class="dashboard-two-column">
+            <!-- Organization Profile Sidebar -->
+            <div class="org-sidebar">
+                <div class="org-header">
+                    <div class="org-logo">
+                        {% if org.logo %}
+                        <img src="{{ org.logo }}" alt="{{ org.org_name }}" class="org-logo-img">
+                        {% else %}
+                        <div class="org-logo-placeholder">{{ org.org_name|default('Org')|truncate(1, true, '') }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <h3 class="org-name">{{ org.org_name }}</h3>
+                    
+                    <div class="verification-badge {% if org.verification_status == 'verified' %}verified{% endif %}">
+                        <i class="fas {% if org.verification_status == 'verified' %}fa-check-circle{% elif org.verification_status == 'pending' %}fa-clock{% else %}fa-times-circle{% endif %}"></i>
+                        {{ org.verification_status|capitalize|default('Unverified') }}
+                    </div>
+                </div>
+                
+                <div class="org-stats">
+                    <div class="stat-group">
+                        <div class="stat-label">Open Requests</div>
+                        <div class="stat-value">{{ requests|selectattr('status', 'equalto', 'pending')|list|length|default(0) }}</div>
+                    </div>
+                    
+                    <div class="stat-group">
+                        <div class="stat-label">Completed Jobs</div>
+                        <div class="stat-value">{{ requests|selectattr('status', 'equalto', 'completed')|list|length|default(0) }}</div>
+                    </div>
+                    
+                    <div class="stat-group">
+                        <div class="stat-label">Active Volunteers</div>
+                        <div class="stat-value">{{ org.volunteers|default([])|length }}</div>
+                    </div>
+                </div>
+                
+                <div class="org-domains">
+                    <div class="section-title">
+                        <span>Service Domains</span>
+                        <button class="add-domain-btn" data-bs-toggle="modal" data-bs-target="#addDomainModal">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
+                    </div>
+                    
+                    {% if org.domains %}
+                    <div class="domains-list">
+                        {% for domain in org.domains %}
+                        <span class="domain-badge">{{ domain }}</span>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="empty-message">No service domains added yet. Add domains to categorize your help requests.</p>
+                    {% endif %}
+                </div>
+                
+                <div class="active-volunteers">
+                    <div class="section-title">
+                        <span>Active Volunteers</span>
+                        <button class="add-domain-btn" data-bs-toggle="modal" data-bs-target="#addVolunteerModal">
+                            <i class="fas fa-user-plus"></i> Add
+                        </button>
+                    </div>
+                    
+                    {% if org.volunteers %}
+                    <div class="volunteer-list">
+                        {% for volunteer_id, volunteer in org.volunteers.items() %}
+                        <div class="volunteer-item">
+                            <div class="volunteer-avatar">
+                                {{ volunteer.name|default('V')|truncate(1, true, '') }}
+                            </div>
+                            <div class="volunteer-info">
+                                <div class="volunteer-name">{{ volunteer.name }}</div>
+                                <div class="volunteer-role">{{ volunteer.role|default('Volunteer') }}</div>
+                            </div>
+                            <div class="volunteer-actions">
+                                <button class="volunteer-action-btn" onclick="assignRequest('{{ volunteer_id }}')" title="Assign Request">
+                                    <i class="fas fa-tasks"></i>
+                                </button>
+                                <button class="volunteer-action-btn" onclick="viewVolunteer('{{ volunteer_id }}')" title="View Profile">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="no-volunteers">
+                        <i class="fas fa-users no-volunteers-icon"></i>
+                        <h5>No volunteers yet</h5>
+                        <p>Add volunteers to your organization to manage and assign them to help requests.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Request Management -->
+            <div class="request-management">
+                <div class="request-management-header">
+                    <h2 class="request-management-title">Request Management</h2>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createRequestModal">
+                        <i class="fas fa-plus"></i> Create Request
+                    </button>
+                </div>
+                
+                <div class="request-tabs">
+                    <button class="request-tab active" onclick="showTab('activeTab')">Active Requests</button>
+                    <button class="request-tab" onclick="showTab('assignedTab')">Assigned</button>
+                    <button class="request-tab" onclick="showTab('completedTab')">Completed</button>
+                </div>
+                
+                <!-- Active Requests Tab -->
+                <div id="activeTab" class="tab-content">
+                    {% set active_requests = requests|selectattr('status', 'equalto', 'pending')|list %}
+                    {% if active_requests %}
+                    <div class="requests-grid">
+                        {% for request in active_requests %}
+                        <div class="request-card" data-priority="{{ request.priority|default('low') }}">
+                            <div class="request-header">
+                                <h3 class="request-title">{{ request.title }}</h3>
+                                <div class="request-priority priority-{{ request.priority|default('low') }}">
+                                    {{ request.priority|default('Low') }}
+                                </div>
+                            </div>
+                            
+                            <div class="request-body">
+                                <p class="request-description">{{ request.description|truncate(150) }}</p>
+                                
+                                <div class="request-meta">
+                                    <div class="meta-item location">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        {{ request.location|default('Not specified') }}
+                                    </div>
+                                    
+                                    <div class="meta-item timing">
+                                        <i class="fas fa-clock"></i>
+                                        {{ request.estimated_time|default('30 mins') }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="request-actions">
+                                <button class="btn btn-outline-primary" onclick="viewRequestDetails('{{ request.id }}')">
+                                    <i class="fas fa-info-circle"></i> Details
+                                </button>
+                                <button class="btn btn-primary" onclick="openAssignModal('{{ request.id }}')">
+                                    <i class="fas fa-user-check"></i> Assign
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list empty-state-icon"></i>
+                        <h4>No Active Requests</h4>
+                        <p>You don't have any active help requests at the moment. Create a new request to start getting help from volunteers.</p>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Assigned Requests Tab -->
+                <div id="assignedTab" class="tab-content" style="display: none;">
+                    {% set assigned_requests = requests|selectattr('status', 'equalto', 'assigned')|list %}
+                    {% if assigned_requests %}
+                    <div class="requests-grid">
+                        {% for request in assigned_requests %}
+                        <div class="request-card" data-priority="{{ request.priority|default('low') }}">
+                            <div class="request-header">
+                                <h3 class="request-title">{{ request.title }}</h3>
+                                <div class="request-priority priority-{{ request.priority|default('low') }}">
+                                    {{ request.priority|default('Low') }}
+                                </div>
+                            </div>
+                            
+                            <div class="request-body">
+                                <p class="request-description">{{ request.description|truncate(150) }}</p>
+                                
+                                <div class="request-meta">
+                                    <div class="meta-item location">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        {{ request.location|default('Not specified') }}
+                                    </div>
+                                    
+                                    <div class="meta-item timing">
+                                        <i class="fas fa-clock"></i>
+                                        {{ request.estimated_time|default('30 mins') }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {% if request.assigned_to %}
+                            <div class="assigned-volunteer">
+                                <div class="volunteer-avatar-small">
+                                    {{ request.volunteer_name|default('V')|truncate(1, true, '') }}
+                                </div>
+                                <div class="volunteer-info-small">
+                                    <div class="volunteer-name-small">{{ request.volunteer_name }}</div>
+                                    <div class="volunteer-since">Assigned on {{ request.assigned_date|default('Recently') }}</div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="request-actions">
+                                <button class="btn btn-outline-primary" onclick="viewRequestDetails('{{ request.id }}')">
+                                    <i class="fas fa-info-circle"></i> Details
+                                </button>
+                                <button class="btn btn-success" onclick="markComplete('{{ request.id }}')">
+                                    <i class="fas fa-check"></i> Mark Complete
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-tasks empty-state-icon"></i>
+                        <h4>No Assigned Requests</h4>
+                        <p>You don't have any assigned help requests at the moment. Assign volunteers to your active requests to see them here.</p>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Completed Requests Tab -->
+                <div id="completedTab" class="tab-content" style="display: none;">
+                    {% set completed_requests = requests|selectattr('status', 'equalto', 'completed')|list %}
+                    {% if completed_requests %}
+                    <div class="requests-grid">
+                        {% for request in completed_requests %}
+                        <div class="request-card" data-priority="{{ request.priority|default('low') }}">
+                            <div class="request-header">
+                                <h3 class="request-title">{{ request.title }}</h3>
+                                <div class="request-priority priority-{{ request.priority|default('low') }}">
+                                    {{ request.priority|default('Low') }}
+                                </div>
+                            </div>
+                            
+                            <div class="request-body">
+                                <p class="request-description">{{ request.description|truncate(150) }}</p>
+                                
+                                <div class="request-meta">
+                                    <div class="meta-item location">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        {{ request.location|default('Not specified') }}
+                                    </div>
+                                    
+                                    <div class="meta-item timing">
+                                        <i class="fas fa-clock"></i>
+                                        {{ request.estimated_time|default('30 mins') }}
+                                    </div>
+                                    
+                                    <div class="meta-item completion">
+                                        <i class="fas fa-calendar-check"></i>
+                                        {{ request.completion_date|default('Recently') }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="completed-by">
+                                <div class="volunteer-avatar-small">
+                                    {{ request.volunteer_name|default('V')|truncate(1, true, '') }}
+                                </div>
+                                <div class="volunteer-info-small">
+                                    <div class="volunteer-name-small">{{ request.volunteer_name }}</div>
+                                    <div class="completion-rating">
+                                        <span class="stars">
+                                            {% for i in range(request.rating|default(5)|int) %}
+                                            <i class="fas fa-star"></i>
+                                            {% endfor %}
+                                        </span>
+                                        <span class="rating-value">{{ request.rating|default('5.0') }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="request-actions">
+                                <button class="btn btn-outline-primary" onclick="viewRequestDetails('{{ request.id }}')">
+                                    <i class="fas fa-info-circle"></i> Details
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="archiveRequest('{{ request.id }}')">
+                                    <i class="fas fa-archive"></i> Archive
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-check-circle empty-state-icon"></i>
+                        <h4>No Completed Requests</h4>
+                        <p>You don't have any completed help requests yet. They will appear here once volunteers complete their assignments.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Create Request Modal -->
+<div class="modal fade" id="createRequestModal" tabindex="-1" aria-labelledby="createRequestModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createRequestModalLabel">Create New Help Request</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createRequestForm">
+                    <div class="form-group">
+                        <label for="requestTitle" class="form-label">Request Title</label>
+                        <input type="text" class="form-control" id="requestTitle" placeholder="Enter a clear title for your request" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="requestDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="requestDescription" rows="4" placeholder="Describe what help is needed..." required></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="requestLocation" class="form-label">Location</label>
+                                <input type="text" class="form-control" id="requestLocation" placeholder="Enter location" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="estimatedTime" class="form-label">Estimated Time</label>
+                                <input type="text" class="form-control" id="estimatedTime" placeholder="e.g., 30 mins, 1 hour" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="requestPriority" class="form-label">Priority Level</label>
+                        <select class="form-select" id="requestPriority" required>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Required Skills</label>
+                        <div class="skills-checkboxes">
+                            {% for domain in org.domains %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="{{ domain }}" id="skill_{{ loop.index }}">
+                                <label class="form-check-label" for="skill_{{ loop.index }}">
+                                    {{ domain }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="createRequest()">Create Request</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Domain Modal -->
+<div class="modal fade" id="addDomainModal" tabindex="-1" aria-labelledby="addDomainModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addDomainModalLabel">Add Service Domain</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addDomainForm">
+                    <div class="form-group">
+                        <label for="domainName" class="form-label">Domain Name</label>
+                        <input type="text" class="form-control" id="domainName" placeholder="e.g., Reading Assistance, Navigation Help" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addDomain()">Add Domain</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Volunteer Modal -->
+<div class="modal fade" id="addVolunteerModal" tabindex="-1" aria-labelledby="addVolunteerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addVolunteerModalLabel">Add Volunteer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addVolunteerForm">
+                    <div class="form-group">
+                        <label for="volunteerEmail" class="form-label">Volunteer Email</label>
+                        <input type="email" class="form-control" id="volunteerEmail" placeholder="Enter volunteer's email address" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="volunteerRole" class="form-label">Role</label>
+                        <select class="form-select" id="volunteerRole" required>
+                            <option value="volunteer">Regular Volunteer</option>
+                            <option value="coordinator">Coordinator</option>
+                            <option value="supervisor">Supervisor</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="volunteerNotes" class="form-label">Notes (Optional)</label>
+                        <textarea class="form-control" id="volunteerNotes" rows="3" placeholder="Add any notes about this volunteer..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addVolunteer()">Add Volunteer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Assign Request Modal -->
+<div class="modal fade" id="assignRequestModal" tabindex="-1" aria-labelledby="assignRequestModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="assignRequestModalLabel">Assign Request</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="assignRequestForm">
+                    <input type="hidden" id="requestId">
+                    <div class="form-group">
+                        <label for="assignVolunteer" class="form-label">Select Volunteer</label>
+                        <select class="form-select" id="assignVolunteer" required>
+                            <option value="" selected disabled>Choose a volunteer...</option>
+                            {% for volunteer_id, volunteer in org.volunteers.items() %}
+                            <option value="{{ volunteer_id }}">{{ volunteer.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="assignmentNotes" class="form-label">Assignment Notes (Optional)</label>
+                        <textarea class="form-control" id="assignmentNotes" rows="3" placeholder="Add any notes for the volunteer..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="assignRequest()">Assign Request</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notification Container -->
+<div id="notificationContainer"></div>
+
+<!-- Add this at the end of your template -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/org_dashboard.css') }}">
+<script>
+    // Tab switching functionality
+    function showTab(tabId) {
+        const tabs = document.querySelectorAll('.tab-content');
+        const buttons = document.querySelectorAll('.request-tab');
+        
+        tabs.forEach(tab => tab.style.display = 'none');
+        buttons.forEach(btn => btn.classList.remove('active'));
+        
+        document.getElementById(tabId).style.display = 'block';
+        event.currentTarget.classList.add('active');
+    }
+    
+    // Create request functionality
+    function createRequest() {
+        const title = document.getElementById('requestTitle').value.trim();
+        const description = document.getElementById('requestDescription').value.trim();
+        const location = document.getElementById('requestLocation').value.trim();
+        const estimatedTime = document.getElementById('estimatedTime').value.trim();
+        const priority = document.getElementById('requestPriority').value;
+        
+        const skillCheckboxes = document.querySelectorAll('.skills-checkboxes input:checked');
+        const skills = Array.from(skillCheckboxes).map(cb => cb.value);
+        
+        if (!title || !description || !location || !estimatedTime) {
+            showNotification('warning', 'Missing Information', 'Please fill out all required fields.');
+            return;
+        }
+        
+        const requestData = {
+            title,
+            description,
+            location,
+            estimated_time: estimatedTime,
+            priority,
+            skills
+        };
+        
+        fetch('/create-request', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(requestData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('success', 'Request Created', 'Your help request has been created successfully.');
+                const modal = bootstrap.Modal.getInstance(document.getElementById('createRequestModal'));
+                modal.hide();
+                document.getElementById('createRequestForm').reset();
+                
+                // Refresh the page to show the new request
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showNotification('error', 'Error', data.message || 'An error occurred while creating the request.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('error', 'Error', 'An error occurred while creating the request.');
+        });
+    }
+    
+    // Add domain functionality
+    function addDomain() {
+        const domainName = document.getElementById('domainName').value.trim();
+        
+        if (!domainName) {
+            showNotification('warning', 'Missing Information', 'Please enter a domain name.');
+            return;
+        }
+        
+        fetch('/add-domain', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ domain_name: domainName })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('success', 'Domain Added', 'The service domain has been added successfully.');
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addDomainModal'));
+                modal.hide();
+                document.getElementById('addDomainForm').reset();
+                
+                // Add the domain to the UI without reloading
+                const domainsList = document.querySelector('.domains-list');
+                const emptyMessage = document.querySelector('.org-domains .empty-message');
+                
+                if (emptyMessage) {
+                    emptyMessage.remove();
+                    const domainsListElement = document.createElement('div');
+                    domainsListElement.className = 'domains-list';
+                    document.querySelector('.org-domains').appendChild(domainsListElement);
+                }
+                
+                const domainBadge = document.createElement('span');
+                domainBadge.className = 'domain-badge';
+                domainBadge.textContent = domainName;
+                domainsList.appendChild(domainBadge);
+            } else {
+                showNotification('error', 'Error', data.message || 'An error occurred while adding the domain.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('error', 'Error', 'An error occurred while adding the domain.');
+        });
+    }
+    
+    // Add volunteer functionality
+    function addVolunteer() {
+        const email = document.getElementById('volunteerEmail').value.trim();
+        const role = document.getElementById('volunteerRole').value;
+        const notes = document.getElementById('volunteerNotes').value.trim();
+        
+        if (!email) {
+            showNotification('warning', 'Missing Information', 'Please enter the volunteer\'s email address.');
+            return;
+        }
+        
+        fetch('/add-volunteer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                email,
+                role,
+                notes
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('success', 'Volunteer Added', 'The volunteer has been added successfully.');
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addVolunteerModal'));
+                modal.hide();
+                document.getElementById('addVolunteerForm').reset();
+                
+                // Refresh the page to show the new volunteer
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showNotification('error', 'Error', data.message || 'An error occurred while adding the volunteer.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('error', 'Error', 'An error occurred while adding the volunteer.');
+        });
+    }
+    
+    // Assign request functionality
+    function openAssignModal(requestId) {
+        document.getElementById('requestId').value = requestId;
+        const modal = new bootstrap.Modal(document.getElementById('assignRequestModal'));
+        modal.show();
+    }
+    
+    function assignRequest() {
+        const requestId = document.getElementById('requestId').value;
+        const volunteerId = document.getElementById('assignVolunteer').value;
+        const notes = document.getElementById('assignmentNotes').value.trim();
+        
+        if (!volunteerId) {
+            showNotification('warning', 'Missing Information', 'Please select a volunteer to assign.');
+            return;
+        }
+        
+        fetch('/assign-request', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                request_id: requestId,
+                volunteer_id: volunteerId,
+                notes
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('success', 'Request Assigned', 'The request has been assigned successfully.');
+                const modal = bootstrap.Modal.getInstance(document.getElementById('assignRequestModal'));
+                modal.hide();
+                document.getElementById('assignRequestForm').reset();
+                
+                // Refresh the page to update the requests
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showNotification('error', 'Error', data.message || 'An error occurred while assigning the request.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('error', 'Error', 'An error occurred while assigning the request.');
+        });
+    }
+    
+    // Mark request as complete
+    function markComplete(requestId) {
+        if (!confirm('Are you sure you want to mark this request as complete?')) {
+            return;
+        }
+        
+        fetch('/org/complete-request', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ request_id: requestId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('success', 'Request Completed', 'The request has been marked as complete.');
+                
+                // Refresh the page to update the requests
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showNotification('error', 'Error', data.message || 'An error occurred while completing the request.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('error', 'Error', 'An error occurred while completing the request.');
+        });
+    }
+    
+    // Archive request
+    function archiveRequest(requestId) {
+        if (!confirm('Are you sure you want to archive this request?')) {
+            return;
+        }
+        
+        fetch('/archive-request', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ request_id: requestId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('success', 'Request Archived', 'The request has been archived successfully.');
+                
+                // Remove the request card from the UI
+                const card = document.querySelector(`.request-card[data-request-id="${requestId}"]`);
+                if (card) {
+                    card.style.opacity = 0;
+                    setTimeout(() => {
+                        card.remove();
+                        updateCounters();
+                    }, 300);
+                }
+            } else {
+                showNotification('error', 'Error', data.message || 'An error occurred while archiving the request.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('error', 'Error', 'An error occurred while archiving the request.');
+        });
+    }
+    
+    // View volunteer profile
+    function viewVolunteer(volunteerId) {
+        window.location.href = `/volunteer/${volunteerId}`;
+    }
+    
+    // View request details
+    function viewRequestDetails(requestId) {
+        window.location.href = `/request/${requestId}`;
+    }
+    
+    // Notification system
+    function showNotification(type, title, message) {
+        const container = document.getElementById('notificationContainer');
+        
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        
+        notification.innerHTML = `
+            <div class="notification-icon">
+                <i class="fas ${
+                    type === 'success' ? 'fa-check-circle' : 
+                    type === 'error' ? 'fa-times-circle' : 
+                    type === 'warning' ? 'fa-exclamation-triangle' : 
+                    'fa-info-circle'
+                }"></i>
+            </div>
+            <div class="notification-content">
+                <div class="notification-title">${title}</div>
+                <div class="notification-message">${message}</div>
+            </div>
+            <button class="notification-close" onclick="closeNotification(this.parentElement)">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        container.appendChild(notification);
+        
+        // Add the show class after a small delay to trigger the animation
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+        
+        // Auto-close after 5 seconds
+        setTimeout(() => {
+            closeNotification(notification);
+        }, 5000);
+    }
+    
+    function closeNotification(notification) {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            notification.remove();
+        }, 500);
+    }
+    
+    function updateCounters() {
+        // Update request counters
+        const activeCounter = document.querySelector('.help-requests .stat-value');
+        const assignedCounter = document.querySelector('.active-requests .stat-value');
+        const completedCounter = document.querySelector('.rating .stat-value');
+        
+        if (activeCounter) {
+            activeCounter.textContent = document.querySelectorAll('#activeTab .request-card').length;
+        }
+        
+        if (assignedCounter) {
+            assignedCounter.textContent = document.querySelectorAll('#assignedTab .request-card').length;
+        }
+        
+        if (completedCounter) {
+            completedCounter.textContent = document.querySelectorAll('#completedTab .request-card').length;
+        }
+    }
+</script>
+{% endblock %}

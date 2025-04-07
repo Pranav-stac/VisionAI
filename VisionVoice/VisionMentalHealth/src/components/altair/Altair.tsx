@@ -1,0 +1,212 @@
+/**
+ * Copyright 2024 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { type FunctionDeclaration, SchemaType } from "@google/generative-ai";
+import { useEffect, useRef, useState, memo } from "react";
+import vegaEmbed from "vega-embed";
+import { useLiveAPIContext } from "../../contexts/LiveAPIContext";
+import { ToolCall } from "../../multimodal-live-types";
+import { useLocation } from "react-router-dom";
+
+const declaration: FunctionDeclaration = {
+  name: "render_altair",
+  description: "Displays an altair graph in json format.",
+  parameters: {
+    type: SchemaType.OBJECT,
+    properties: {
+      json_graph: {
+        type: SchemaType.STRING,
+        description:
+          "JSON STRING representation of the graph to render. Must be a string, not a json object",
+      },
+    },
+    required: ["json_graph"],
+  },
+};
+
+function AltairComponent() {
+  const [jsonString, setJSONString] = useState<string>("");
+  const { client, setConfig } = useLiveAPIContext();
+  const location = useLocation();
+  const currentPath = location.pathname;
+  const isMentalHealthRoute = currentPath === '/mentalhealth';
+
+  useEffect(() => {
+    // Define the systemText instructions based on route
+    const systemText = `I am Dr. Ellis, a licensed clinical psychologist with 15 years of experience in cognitive-behavioral therapy, mindfulness-based interventions, and trauma-informed care. 
+
+I'm here with you for a voice-only therapy session. I'll listen carefully to your concerns and respond with empathy and professional guidance.
+
+My therapeutic approach emphasizes creating a safe, confidential space where you can explore your thoughts and feelings without judgment. I practice active listening and validate your unique experiences.
+
+During our session, I'll use therapeutic techniques like:
+- Cognitive reframing to help identify and transform negative thought patterns
+- Guided mindfulness exercises for grounding during moments of distress
+- Strengths-based reflection to recognize your inherent capabilities
+- Motivational interviewing to explore ambivalence about change
+- Emotion-focused techniques to process difficult feelings in a healthy way
+
+I'll offer personalized coping strategies based on evidence-based practices while respecting your agency and autonomy. I'll check in with you regularly to ensure my approach resonates with your needs.
+
+While I can provide emotional support and therapeutic guidance, I cannot diagnose conditions or prescribe medications. For clinical diagnoses, medication management, or crisis situations, I'll recommend connecting with a licensed healthcare provider in your area.
+
+How are you feeling today? We can start wherever feels most comfortable for you.`;
+
+    setConfig({
+      model: "models/gemini-2.0-flash-exp",
+      generationConfig: {
+        responseModalities: "audio",
+        speechConfig: {
+          voiceConfig: { prebuiltVoiceConfig: { voiceName: "Aoede" } },
+        },
+      },
+      systemInstruction: {
+        parts: [
+          {
+            text: systemText,
+          },
+        ],
+      },
+      tools: [
+        // there is a free-tier quota for search
+        { googleSearch: {} },
+        { functionDeclarations: [declaration] },
+      ],
+    });
+    
+    console.log(`Running in mode: ${isMentalHealthRoute ? 'Mental Health Route' : 'Default Route'}`);
+    
+  }, [setConfig, isMentalHealthRoute, currentPath]);
+
+  useEffect(() => {
+    const onToolCall = (toolCall: ToolCall) => {
+      console.log(`got toolcall`, toolCall);
+      const fc = toolCall.functionCalls.find(
+        (fc) => fc.name === declaration.name,
+      );
+      if (fc) {
+        const str = (fc.args as any).json_graph;
+        setJSONString(str);
+      }
+      // send data for the response of your tool call
+      // in this case Im just saying it was successful
+      if (toolCall.functionCalls.length) {
+        setTimeout(
+          () =>
+            client.sendToolResponse({
+              functionResponses: toolCall.functionCalls.map((fc) => ({
+                response: { output: { success: true } },
+                id: fc.id,
+              })),
+            }),
+          200,
+        );
+      }
+    };
+    client.on("toolcall", onToolCall);
+    return () => {
+      client.off("toolcall", onToolCall);
+    };
+  }, [client]);
+
+  const embedRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (embedRef.current && jsonString) {
+      vegaEmbed(embedRef.current, JSON.parse(jsonString));
+    }
+  }, [embedRef, jsonString]);
+  
+  return (
+    <>
+      {isMentalHealthRoute && (
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          marginBottom: '20px',
+          width: '100%'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            marginBottom: '15px',
+            padding: '10px',
+            borderRadius: '8px',
+            backgroundColor: 'var(--Neutral-5)',
+            width: '100%',
+            maxWidth: '500px'
+          }}>
+            <div style={{
+              width: '60px',
+              height: '60px',
+              borderRadius: '50%',
+              backgroundColor: 'var(--Blue-800)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginRight: '15px',
+              color: 'var(--Blue-500)',
+              fontWeight: 'bold',
+              fontSize: '24px'
+            }}>
+              DE
+            </div>
+            <div>
+              <div style={{ fontWeight: 'bold', color: 'var(--Neutral-90)' }}>Dr. Sarah Ellis, PhD</div>
+              <div style={{ fontSize: '14px', color: 'var(--Neutral-60)' }}>Licensed Clinical Psychologist</div>
+              <div style={{ fontSize: '12px', color: 'var(--Blue-500)', marginTop: '3px' }}>CBT Specialist • Anxiety & Depression • Trauma</div>
+            </div>
+          </div>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            backgroundColor: 'var(--Blue-800)',
+            color: 'var(--Blue-500)',
+            padding: '5px 12px',
+            borderRadius: '20px',
+            fontSize: '12px',
+            fontWeight: 'bold',
+            marginBottom: '10px'
+          }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>headphones</span>
+            VOICE-ONLY THERAPY SESSION
+          </div>
+          <p style={{ 
+            fontSize: '14px', 
+            color: 'var(--Neutral-60)',
+            fontStyle: 'italic',
+            textAlign: 'center',
+            maxWidth: '400px'
+          }}>
+            Speak naturally to begin your session with Dr. Ellis.
+            Your voice interactions are confidential and secure.
+          </p>
+        </div>
+      )}
+      <div className="vega-embed" ref={embedRef} style={{
+        width: '100%',
+        padding: '10px',
+        borderRadius: '8px',
+        backgroundColor: isMentalHealthRoute ? 'var(--Neutral-5)' : 'transparent',
+        border: isMentalHealthRoute ? '1px solid var(--Neutral-20)' : 'none'
+      }} />
+    </>
+  );
+}
+
+export const Altair = memo(AltairComponent);

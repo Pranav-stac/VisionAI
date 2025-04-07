@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "335489594965",
+    "firebase_url": "https://vision-ai-f6345-default-rtdb.firebaseio.com",
+    "project_id": "vision-ai-f6345",
+    "storage_bucket": "vision-ai-f6345.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:335489594965:android:11bec921f481d9354ec6dc",
+        "android_client_info": {
+          "package_name": "vision.ai"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "335489594965-eivrg2lbrku27oub9hf4ddfdbuoa48u3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "vision.ai",
+            "certificate_hash": "de65c963816a944598c3c558aba549bff9a88f34"
+          }
+        },
+        {
+          "client_id": "335489594965-hn51vjgtial9u3d3sf1c1q4o1ii9ub6i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCy6FET69_SR2RX2B2OOoKiS4t-1LGP-b0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "335489594965-hn51vjgtial9u3d3sf1c1q4o1ii9ub6i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

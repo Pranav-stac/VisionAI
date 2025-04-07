@@ -1,0 +1,42 @@
+{
+  "rules": {
+    ".read": true,
+    ".write": true,
+    "users": {
+      "$uid": {
+        ".read": true,
+        ".write": true,
+        "status": {
+          ".read": true,
+          ".write": true
+        },
+        "profile": {
+          ".read": true,
+          ".write": true
+        }
+      }
+    },
+    "status": {
+      "$uid": {
+        ".read": true,
+        ".write": true
+      }
+    },
+    "organizations": {
+      ".read": true,
+      ".write": true,
+      "$orgId": {
+        ".read": true,
+        ".write": true
+      }
+    },
+    "help_requests": {
+      ".read": true,
+      ".write": true,
+      "$requestId": {
+        ".read": true,
+        ".write": true
+      }
+    }
+  }
+} 
