@@ -3,6 +3,7 @@ import 'package:visionai/screens/auth/login_screen.dart';
 import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:visionai/widgets/base_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -90,11 +91,33 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
     final secondaryColor = Colors.white.withOpacity(0.8);
     final accentColor = Colors.blue;
 
-    return Scaffold(
-      backgroundColor: backgroundColor,
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : CustomScrollView(
+    return BaseScreen(
+      builder: (context, localizedStrings) {
+        // Update tab titles with localized strings
+        List<String> localizedTabTitles = [
+          localizedStrings['personal'] ?? 'Personal',
+          localizedStrings['settings'] ?? 'Settings',
+          localizedStrings['activity'] ?? 'Activity',
+        ];
+        
+        return Scaffold(
+          backgroundColor: backgroundColor,
+          body: _isLoading
+            ? Center(child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  Text(
+                    localizedStrings['loading'] ?? 'Loading...',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ))
+            : CustomScrollView(
               slivers: [
                 SliverAppBar(
                   expandedHeight: 200,
@@ -186,7 +209,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                             unselectedLabelColor: Colors.white70,
                             dividerColor: Colors.transparent,
                             splashBorderRadius: BorderRadius.circular(25),
-                            tabs: _tabTitles.map((title) => 
+                            tabs: localizedTabTitles.map((title) => 
                               Tab(text: title)
                             ).toList(),
                           ),
@@ -198,25 +221,14 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: AnimatedBuilder(
-                              animation: _fadeAnimation,
-                              builder: (context, child) {
-                                return FadeTransition(
-                                  opacity: _fadeAnimation,
-                                  child: child,
-                                );
-                              },
+                            child: FadeTransition(
+                              opacity: _fadeAnimation,
                               child: TabBarView(
                                 controller: _tabController,
                                 children: [
-                                  // Personal Tab
-                                  _buildTabContent(_buildPersonalTab(context)),
-                                  
-                                  // Settings Tab
-                                  _buildTabContent(_buildSettingsTab(context)),
-                                  
-                                  // Activity Tab
-                                  _buildTabContent(_buildActivityTab(context)),
+                                  _buildPersonalTab(context, localizedStrings),
+                                  _buildSettingsTab(context, localizedStrings),
+                                  _buildActivityTab(context, localizedStrings),
                                 ],
                               ),
                             ),
@@ -228,55 +240,42 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                 ),
               ],
             ),
+        );
+      },
     );
   }
 
-  // Create consistent container for tab content
-  Widget _buildTabContent(Widget child) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF121212),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: child,
-      ),
-    );
-  }
-
-  // Personal Tab
-  Widget _buildPersonalTab(BuildContext context) {
+  Widget _buildPersonalTab(BuildContext context, Map<String, String> localizedStrings) {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(vertical: 16),
       physics: const BouncingScrollPhysics(),
       child: Column(
         children: [
-          _buildSectionTitle(context, 'Account Information'),
+          _buildSectionTitle(context, localizedStrings['accountInformation'] ?? 'Account Information'),
           _buildSettingItem(
             context,
             icon: Icons.person_outline,
-            title: 'Personal Information',
+            title: localizedStrings['personalInformation'] ?? 'Personal Information',
             subtitle: 'Name, email, phone number',
             onTap: () {},
           ),
           _buildSettingItem(
             context,
             icon: Icons.security,
-            title: 'Security',
+            title: localizedStrings['security'] ?? 'Security',
             subtitle: 'Password, 2FA, privacy',
             onTap: () {},
           ),
           _buildSettingItem(
             context,
             icon: Icons.language,
-            title: 'Language',
+            title: localizedStrings['language'] ?? 'Language',
             subtitle: 'English (US)',
             onTap: () {},
           ),
           
           const SizedBox(height: 16),
-          _buildSectionTitle(context, 'Linked Accounts'),
+          _buildSectionTitle(context, localizedStrings['linkedAccounts'] ?? 'Linked Accounts'),
           _buildSettingItem(
             context,
             icon: Icons.facebook,
@@ -365,25 +364,24 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
     );
   }
   
-  // Settings Tab
-  Widget _buildSettingsTab(BuildContext context) {
+  Widget _buildSettingsTab(BuildContext context, Map<String, String> localizedStrings) {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(vertical: 16),
       physics: const BouncingScrollPhysics(),
       child: Column(
         children: [
-          _buildSectionTitle(context, 'App Preferences'),
+          _buildSectionTitle(context, localizedStrings['appPreferences'] ?? 'App Preferences'),
           _buildSettingItem(
             context,
             icon: Icons.notifications_outlined,
-            title: 'Notifications',
+            title: localizedStrings['notifications'] ?? 'Notifications',
             subtitle: 'Manage all notifications',
             onTap: () {},
           ),
           _buildSettingItem(
             context,
             icon: Icons.notifications_active_outlined,
-            title: 'Push Notifications',
+            title: localizedStrings['pushNotifications'] ?? 'Push Notifications',
             isSwitch: true,
             switchValue: true,
             onSwitchChanged: (value) {},
@@ -391,39 +389,39 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           _buildSettingItem(
             context,
             icon: Icons.volume_up_outlined,
-            title: 'Sound Effects',
+            title: localizedStrings['soundEffects'] ?? 'Sound Effects',
             isSwitch: true,
             switchValue: true,
             onSwitchChanged: (value) {},
           ),
           
           const SizedBox(height: 16),
-          _buildSectionTitle(context, 'Accessibility'),
+          _buildSectionTitle(context, localizedStrings['accessibility'] ?? 'Accessibility'),
           _buildSettingItem(
             context,
             icon: Icons.visibility,
-            title: 'Visual Preferences',
+            title: localizedStrings['visualPreferences'] ?? 'Visual Preferences',
             subtitle: 'Font size, contrast, animations',
             onTap: () {},
           ),
           _buildSettingItem(
             context,
             icon: Icons.hearing,
-            title: 'Audio Preferences',
+            title: localizedStrings['audioPreferences'] ?? 'Audio Preferences',
             subtitle: 'Volume levels, closed captions',
             onTap: () {},
           ),
           _buildSettingItem(
             context,
             icon: Icons.touch_app,
-            title: 'Touch & Interaction',
+            title: localizedStrings['touchInteraction'] ?? 'Touch & Interaction',
             subtitle: 'Haptics, gestures, sensitivity',
             onTap: () {},
           ),
           _buildSettingItem(
             context,
             icon: Icons.dark_mode,
-            title: 'Dark Mode',
+            title: localizedStrings['darkMode'] ?? 'Dark Mode',
             isSwitch: true,
             switchValue: true,
             onSwitchChanged: (value) {},
@@ -433,14 +431,13 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
     );
   }
   
-  // Activity Tab
-  Widget _buildActivityTab(BuildContext context) {
+  Widget _buildActivityTab(BuildContext context, Map<String, String> localizedStrings) {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(vertical: 16),
       physics: const BouncingScrollPhysics(),
       child: Column(
         children: [
-          _buildSectionTitle(context, 'Recent Activity'),
+          _buildSectionTitle(context, localizedStrings['recentActivity'] ?? 'Recent Activity'),
           
           // Empty state with better styling
           Padding(
@@ -472,7 +469,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Your activity will appear here once you start using the app features.',
+                  localizedStrings['noRecentActivity'] ?? 'Your activity will appear here once you start using the app features.',
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey[400],
@@ -486,7 +483,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                     Navigator.of(context).pop();
                   },
                   icon: const Icon(Icons.explore),
-                  label: const Text('Explore Features'),
+                  label: Text(localizedStrings['exploreFeatures'] ?? 'Explore Features'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.blue,
                     side: const BorderSide(color: Colors.blue),
@@ -504,25 +501,25 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           ),
           
           const SizedBox(height: 16),
-          _buildSectionTitle(context, 'Support'),
+          _buildSectionTitle(context, localizedStrings['support'] ?? 'Support'),
           _buildSettingItem(
             context,
             icon: Icons.help_outline,
-            title: 'Help Center',
-            subtitle: 'FAQs and troubleshooting',
+            title: localizedStrings['helpCenter'] ?? 'Help Center',
+            subtitle: localizedStrings['faqsAndTroubleshooting'] ?? 'FAQs and troubleshooting',
             onTap: () {},
           ),
           _buildSettingItem(
             context,
             icon: Icons.feedback_outlined,
-            title: 'Feedback',
-            subtitle: 'Help us improve the app',
+            title: localizedStrings['feedback'] ?? 'Feedback',
+            subtitle: localizedStrings['helpUsImproveTheApp'] ?? 'Help us improve the app',
             onTap: () {},
           ),
           _buildSettingItem(
             context,
             icon: Icons.info_outline,
-            title: 'About',
+            title: localizedStrings['about'] ?? 'About',
             subtitle: 'Version 1.0.0',
             onTap: () {},
           ),

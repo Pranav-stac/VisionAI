@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:visionai/screens/features/captioning_screen.dart';
+import 'package:visionai/screens/features/scenedescriptionlive.dart';
 import 'package:visionai/screens/features/voice_generation_screen.dart';
+import 'package:visionai/screens/features/scene_description_screen.dart';
 
 import 'package:visionai/screens/features/volunteer_network_screen.dart';
 import 'package:visionai/screens/features/learning_resources_screen.dart';
@@ -11,6 +13,10 @@ import 'package:visionai/widgets/feature_card.dart';
 import 'package:visionai/screens/profile/profile_screen.dart';
 import 'package:visionai/screens/features/communities_screen.dart';
 import 'package:go_router/go_router.dart';
+import 'package:visionai/screens/settings/settings_screen.dart';
+import 'package:visionai/utils/app_localizations.dart';
+import 'package:provider/provider.dart';
+import 'package:visionai/providers/language_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -54,45 +60,51 @@ class _HomeScreenState extends State<HomeScreen> {
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
           ),
-          child: BottomNavigationBar(
-            currentIndex: _selectedIndex,
-            onTap: _onItemTapped,
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : const Color(0xFF1C1C1E),
-            selectedItemColor: Theme.of(context).colorScheme.primary,
-            unselectedItemColor: Colors.grey,
-            selectedLabelStyle: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 12,
-            ),
-            unselectedLabelStyle: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 12,
-            ),
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home_outlined),
-                activeIcon: Icon(Icons.home),
-                label: 'Home',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.people_outline),
-                activeIcon: Icon(Icons.people),
-                label: 'Volunteers',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.favorite_outline),
-                activeIcon: Icon(Icons.favorite),
-                label: 'Communities',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person_outline),
-                activeIcon: Icon(Icons.person),
-                label: 'Profile',
-              ),
-            ],
+          child: Consumer<LanguageProvider>(
+            builder: (context, languageProvider, _) {
+              final Map<String, String> localizedStrings = AppLocalizations.getLocalizedStrings(context);
+              
+              return BottomNavigationBar(
+                currentIndex: _selectedIndex,
+                onTap: _onItemTapped,
+                type: BottomNavigationBarType.fixed,
+                backgroundColor: Theme.of(context).brightness == Brightness.light
+                    ? Colors.white
+                    : const Color(0xFF1C1C1E),
+                selectedItemColor: Theme.of(context).colorScheme.primary,
+                unselectedItemColor: Colors.grey,
+                selectedLabelStyle: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
+                unselectedLabelStyle: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
+                items: [
+                  BottomNavigationBarItem(
+                    icon: const Icon(Icons.home_outlined),
+                    activeIcon: const Icon(Icons.home),
+                    label: localizedStrings['home'] ?? 'Home',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: const Icon(Icons.people_outline),
+                    activeIcon: const Icon(Icons.people),
+                    label: localizedStrings['volunteers'] ?? 'Volunteers',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: const Icon(Icons.favorite_outline),
+                    activeIcon: const Icon(Icons.favorite),
+                    label: localizedStrings['communities'] ?? 'Communities',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: const Icon(Icons.person_outline),
+                    activeIcon: const Icon(Icons.person),
+                    label: localizedStrings['profile'] ?? 'Profile',
+                  ),
+                ],
+              );
+            }
           ),
         ),
       ),
@@ -108,6 +120,7 @@ class HomeContent extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final size = MediaQuery.of(context).size;
+    final localizedStrings = AppLocalizations.getLocalizedStrings(context);
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -124,7 +137,7 @@ class HomeContent extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Hello, User',
+                        localizedStrings['helloUser'] ?? 'Hello, User',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -133,7 +146,7 @@ class HomeContent extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'How can we assist you today?',
+                        localizedStrings['howCanWeAssist'] ?? 'How can we assist you today?',
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey[600],
@@ -141,20 +154,29 @@ class HomeContent extends StatelessWidget {
                       ),
                     ],
                   ),
+                  const SizedBox(width: 12),
                   Container(
                     width: 48,
                     height: 48,
-                    decoration: BoxDecoration(
-                      color: colorScheme.primaryContainer,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: IconButton(
-                        icon: const Icon(Icons.notifications_outlined),
-                        color: colorScheme.primary,
-                        onPressed: () {
-                          // Navigate to notifications
+                
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(24),
+                        splashColor: colorScheme.primary.withOpacity(0.1),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SettingsScreen(),
+                            ),
+                          );
                         },
+                        child: Icon(
+                          Icons.settings_outlined,
+                          color: colorScheme.primary,
+                          size: 24,
+                        ),
                       ),
                     ),
                   ),
@@ -166,7 +188,7 @@ class HomeContent extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
               child: Text(
-                'Quick Actions',
+                localizedStrings['quickActions'] ?? 'Quick Actions',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -181,10 +203,24 @@ class HomeContent extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 children: [
+                   _buildQuickActionCard(
+                    context,
+                    icon: Icons.camera_alt,
+                    title: localizedStrings['sceneDescription'] ?? 'Scene Description',
+                    color: Colors.purple,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SceneDescriptionScreen(),
+                        ),
+                      );
+                    },
+                  ),
                   _buildQuickActionCard(
                     context,
                     icon: Icons.mic,
-                    title: 'Voice to Text',
+                    title: localizedStrings['voiceToText'] ?? 'Voice to Text',
                     color: Colors.blue,
                     onTap: () {
                       Navigator.push(
@@ -198,7 +234,7 @@ class HomeContent extends StatelessWidget {
                   _buildQuickActionCard(
                     context,
                     icon: Icons.image,
-                    title: 'Realtime Captioning',
+                    title: localizedStrings['realtimeCaptioning'] ?? 'Realtime Captioning',
                     color: Colors.amber,
                     onTap: () {
                       Navigator.push(
@@ -212,7 +248,7 @@ class HomeContent extends StatelessWidget {
                   _buildQuickActionCard(
                     context,
                     icon: Icons.record_voice_over,
-                    title: 'Text to Voice',
+                    title: localizedStrings['textToVoice'] ?? 'Text to Voice',
                     color: Colors.green,
                     onTap: () {
                       Navigator.push(
@@ -223,32 +259,11 @@ class HomeContent extends StatelessWidget {
                       );
                     },
                   ),
-                  _buildQuickActionCard(
-                    context,
-                    icon: Icons.camera_alt,
-                    title: 'Scene Description',
-                    color: Colors.purple,
-                    onTap: () async {
-                      try {
-                        final Uri url = Uri.parse('https://useful-herring-radically.ngrok-free.app');
-                        if (await canLaunchUrl(url)) {
-                          await launchUrl(url, mode: LaunchMode.externalApplication);
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Could not launch the URL')),
-                          );
-                        }
-                      } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Error: $e')),
-                        );
-                      }
-                    },
-                  ),
+                 
                   _buildQuickActionCard(
                     context,
                     icon: Icons.help_outline,
-                    title: 'Get Help',
+                    title: localizedStrings['getHelp'] ?? 'Get Help',
                     color: Colors.red,
                     onTap: () {
                       Navigator.push(
@@ -267,7 +282,7 @@ class HomeContent extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 32, 24, 16),
               child: Text(
-                'Features',
+                localizedStrings['features'] ?? 'Features',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -287,8 +302,8 @@ class HomeContent extends StatelessWidget {
                 children: [
            
                   FeatureCard(
-                    title: 'Realtime Captioning',
-                    description: 'Generate images from speech',
+                    title: localizedStrings['realtimeCaptioning'] ?? 'Realtime Captioning',
+                    description: localizedStrings['voiceToText'] ?? 'Generate images from speech',
                     icon: Icons.image,
                     color: Colors.amber,
                     onTap: () {
@@ -301,8 +316,8 @@ class HomeContent extends StatelessWidget {
                     },
                   ),
                   FeatureCard(
-                    title: 'Voice Generation',
-                    description: 'Generate natural speech from text',
+                    title: localizedStrings['voiceGeneration'] ?? 'Voice Generation',
+                    description: localizedStrings['textToSpeech'] ?? 'Generate natural speech from text',
                     icon: Icons.record_voice_over,
                     color: Colors.green,
                     onTap: () {
@@ -315,55 +330,36 @@ class HomeContent extends StatelessWidget {
                     },
                   ),
                   FeatureCard(
-                    title: 'Scene Description',
-                    description: 'Audio description of surroundings',
+                    title: localizedStrings['sceneDescription'] ?? 'Scene Description',
+                    description: localizedStrings['camera'] ?? 'Audio description of surroundings',
                     icon: Icons.camera_alt,
                     color: Colors.purple,
-                    onTap: () async {
-                      final Uri url = Uri.parse('https://useful-herring-radically.ngrok-free.app');
-                      try {
-                        await launchUrl(
-                          url,
-                          mode: LaunchMode.externalApplication,
-                          webViewConfiguration: const WebViewConfiguration(
-                            enableJavaScript: true,
-                            enableDomStorage: true,
-                          ),
-                        );
-                      } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Could not launch scene description: ${e.toString()}')),
-                        );
-                      }
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SceneDescriptionlive(),
+                        ),
+                      );
                     },
                   ),
                   FeatureCard(
-                    title: 'Mental Health',
-                    description: 'AI-driven emotional support',
+                    title: localizedStrings['mentalHealth'] ?? 'Mental Health',
+                    description: localizedStrings['mentalHealth'] ?? 'AI-driven emotional support',
                     icon: Icons.favorite,
                     color: Colors.red,
-                    onTap: () async {
-                      final Uri url = Uri.parse('https://useful-herring-radically.ngrok-free.app');
-                      try {
-                        // Use a more reliable approach for launching URLs
-                        await launchUrl(
-                          url,
-                          mode: LaunchMode.externalApplication,
-                          webViewConfiguration: const WebViewConfiguration(
-                            enableJavaScript: true,
-                            enableDomStorage: true,
-                          ),
-                        );
-                      } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Could not launch mental health support: ${e.toString()}')),
-                        );
-                      }
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const MentalHealthScreen(),
+                        ),
+                      );
                     },
                   ),
                   FeatureCard(
-                    title: 'Volunteer Network',
-                    description: 'Connect with nearby helpers',
+                    title: localizedStrings['volunteerNetwork'] ?? 'Volunteer Network',
+                    description: localizedStrings['volunteers'] ?? 'Connect with nearby helpers',
                     icon: Icons.people,
                     color: Colors.orange,
                     onTap: () {
@@ -376,8 +372,8 @@ class HomeContent extends StatelessWidget {
                     },
                   ),
                   FeatureCard(
-                    title: 'Learning Resources',
-                    description: 'Educational content & AR/VR',
+                    title: localizedStrings['learningResources'] ?? 'Learning Resources',
+                    description: localizedStrings['continueText'] ?? 'Educational content & AR/VR',
                     icon: Icons.school,
                     color: Colors.teal,
                     onTap: () {

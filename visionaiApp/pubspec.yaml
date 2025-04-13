@@ -49,7 +49,7 @@ dependencies:
   # Network and API
   http: ^0.13.6
   dio: ^5.4.0
-  openai: ^1.0.0
+ 
   
   # Local Storage
   shared_preferences: ^2.2.2
@@ -82,9 +82,9 @@ dependencies:
   arkit_plugin: ^1.0.7
   
   # Others
-  intl: ^0.17.0
+  intl: ^0.19.0
   url_launcher: ^6.2.2
-  permission_handler: ^11.1.0
+  permission_handler: ^10.2.0
   connectivity_plus: ^5.0.2
   device_info_plus: ^9.1.1
   package_info_plus: ^4.2.0
@@ -93,7 +93,14 @@ dependencies:
   youtube_player_flutter: ^8.1.2
   cached_network_image: ^3.3.0
   google_sign_in: ^6.2.2
- 
+
+  webview_flutter: ^4.0.0
+  flutter_inappwebview: ^5.7.2+3
+  
+  # Added for low latency image analysis with Gemini
+  flutter_image_compress: ^2.0.0
+  
+  # Other existing dependencies...
 
 dev_dependencies:
   flutter_test:

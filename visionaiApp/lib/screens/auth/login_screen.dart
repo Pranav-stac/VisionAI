@@ -47,12 +47,18 @@ class _LoginScreenState extends State<LoginScreen> {
         _passwordController.text,
       );
       
-      _navigateToHome();
+      // Check if still mounted before navigating
+      if (mounted) {
+        _navigateToHome();
+      }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-        _errorMessage = e.toString();
-      });
+      // Only update state if still mounted
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = e.toString();
+        });
+      }
     }
   }
 
@@ -69,21 +75,29 @@ class _LoginScreenState extends State<LoginScreen> {
       // Use renamed method
       await _authService.dummySignInWithGoogle();
       
-      _navigateToHome();
+      // Check if still mounted before navigating
+      if (mounted) {
+        _navigateToHome();
+      }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-        _errorMessage = "An error occurred during sign in";
-      });
+      // Only update state if still mounted
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = "An error occurred during sign in";
+        });
+      }
       print('Login screen: Dummy Google sign-in error: $e');
     }
   }
 
   void _navigateToHome() {
     if (mounted) {
-      Navigator.pushReplacement(
+      // Use Navigator.pushAndRemoveUntil instead of pushReplacement to avoid stacking issues
+      Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const HomeScreen()),
+        (route) => false,
       );
     }
   }

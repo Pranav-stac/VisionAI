@@ -73,6 +73,10 @@ class _ImageCaptioningScreenState extends State<ImageCaptioningScreen> with Widg
   DateTime _lastProcessTime = DateTime.now().subtract(Duration(days: 1));
   bool _isProcessingText = false;
 
+  // Add these variables for Google Search API
+  String _googleSearchApiKey = 'AIzaSyAdLio3yM6yxC9jDz0BA9LKhhXh0hbDts4'; // Replace with your actual API key
+  String _googleSearchEngineId = '02b947281690f4e71'; // Replace with your actual Search Engine ID
+
   @override
   void initState() {
     super.initState();
@@ -82,6 +86,9 @@ class _ImageCaptioningScreenState extends State<ImageCaptioningScreen> with Widg
     _speech = stt.SpeechToText();
     _initSpeech();
     _loadPreferences();
+    
+    // Load API keys from secure storage
+    _loadApiKeys();
   }
 
   @override
@@ -281,6 +288,15 @@ class _ImageCaptioningScreenState extends State<ImageCaptioningScreen> with Widg
       _minWordsForProcessing = prefs.getInt('min_words_for_processing') ?? 2;
       _streamProcessDelay = prefs.getInt('stream_process_delay') ?? 1000;
     });
+  }
+
+  // Load API keys from secure storage
+  Future<void> _loadApiKeys() async {
+    final prefs = await SharedPreferences.getInstance();
+    
+    // Get stored keys if available
+    _googleSearchApiKey = prefs.getString('google_api_key') ?? _googleSearchApiKey;
+    _googleSearchEngineId = prefs.getString('google_cse_id') ?? _googleSearchEngineId;
   }
 
   void _toggleListening() {
@@ -501,7 +517,86 @@ class _ImageCaptioningScreenState extends State<ImageCaptioningScreen> with Widg
     _isProcessingText = false;
   }
   
-  // Update the image generation method to be simpler
+  // Extract action words from text
+  String _extractActionWords(String text) {
+    if (text.isEmpty) return '';
+    
+    // Convert to lowercase and tokenize
+    final tokens = text.toLowerCase().split(' ');
+    
+    // Comprehensive stop words list including verbs, articles, pronouns, and other non-content words
+    final stopWords = {
+      // Articles, determiners, prepositions
+      'a', 'an', 'the', 'of', 'for', 'with', 'at', 'from', 'to', 'in', 'on', 'by', 'about',
+      'like', 'through', 'over', 'before', 'after', 'between', 'under', 'during', 'without',
+      
+      // Pronouns
+      'i', 'me', 'my', 'mine', 'myself', 'you', 'your', 'yours', 'yourself', 'he', 'him', 'his',
+      'himself', 'she', 'her', 'hers', 'herself', 'it', 'its', 'itself', 'we', 'us', 'our',
+      'ours', 'ourselves', 'they', 'them', 'their', 'theirs', 'themselves', 'this', 'that',
+      'these', 'those',
+      
+      // Common verbs and auxiliaries
+      'is', 'am', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do',
+      'does', 'did', 'will', 'would', 'shall', 'should', 'can', 'could', 'may', 'might',
+      'must', 'go', 'goes', 'going', 'went', 'gone', 'let', "let's", 'say', 'says', 'said',
+      'make', 'makes', 'made', 'see', 'sees', 'saw', 'seen', 'give', 'gives', 'gave', 'given',
+      'find', 'finds', 'found', 'think', 'thinks', 'thought', 'put', 'puts', 'take', 'takes',
+      'took', 'taken', 'come', 'comes', 'came', 'tell', 'tells', 'told', 'need', 'needs',
+      'needed', 'want', 'wants', 'wanted', 'try', 'tries', 'tried',
+      
+      // Conjunctions and other functional words
+      'and', 'but', 'if', 'or', 'because', 'as', 'until', 'while', 'then', 'than', 'so',
+      'just', 'now', 'also', 'too', 'very', 'more', 'most', 'some', 'any', 'all', 'many',
+      'much', 'such', 'no', 'not', 'only', 'even', 'really', 'actually', 'maybe',
+      'perhaps', 'yes', 'well', 'get', 'got', 'getting', 'gotten',
+      
+      // Contractions and shortened forms
+      "i'm", "you're", "he's", "she's", "it's", "we're", "they're", "i've", "you've",
+      "we've", "they've", "isn't", "aren't", "wasn't", "weren't", "don't", "doesn't",
+      "didn't", "can't", "couldn't", "shouldn't", "wouldn't", "won't", "that's", "there's",
+      "here's", "who's", "what's", "where's", "when's", "why's", "how's"
+    };
+    
+    // Filter out stop words
+    List<String> actionWords = tokens
+        .where((word) => !stopWords.contains(word.trim().replaceAll(RegExp(r'[^\w\s]'), '')))
+        .toList();
+    
+    // Remove any single characters left and trailing punctuation
+    actionWords = actionWords
+        .where((word) => word.trim().length > 1)
+        .map((word) => word.replaceAll(RegExp(r'[^\w\s]$'), ''))
+        .toList();
+    
+    // If too few words after filtering, try to find the most important words in original text
+    if (actionWords.isEmpty) {
+      // Filter by word length as a simple heuristic for finding nouns
+      final possibleKeywords = tokens
+          .where((word) => word.length > 4) // Longer words are often content words
+          .toList();
+      
+      if (possibleKeywords.isNotEmpty) {
+        actionWords = possibleKeywords;
+      } else {
+        // Fallback to original tokens, but limit to a few
+        return tokens.take(2).join(' ');
+      }
+    }
+    
+    // Prioritize longer words (often nouns) by sorting
+    actionWords.sort((a, b) => b.length.compareTo(a.length));
+    
+    // Take up to 3 words, preferring longer words which are often nouns
+    final queryWords = actionWords.take(3).join(' ');
+    
+    print('Original text: "$text"');
+    print('Extracted action words: "$queryWords"');
+    
+    return queryWords;
+  }
+  
+  // Replace the image generation method with Google Search API
   Future<void> _generateImageFromText(String text) async {
     if (text.isEmpty || _isGeneratingImage) return;
     
@@ -509,15 +604,42 @@ class _ImageCaptioningScreenState extends State<ImageCaptioningScreen> with Widg
       _isGeneratingImage = true;
     });
     
-    print('🖼️ GENERATING IMAGE FOR: "$text"');
-    
     try {
-      final response = await http.post(
-        Uri.parse("https://pranavai.onrender.com/generate"),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          "prompt": text
-        }),
+      // Extract action words for better search results
+      final searchQuery = _extractActionWords(text);
+      
+      print('🔍 SEARCHING IMAGES FOR: "$searchQuery"');
+      
+      // Check if API keys are set
+      if (_googleSearchApiKey.isEmpty || _googleSearchEngineId.isEmpty) {
+        print('❌ Google Search API keys not configured');
+        
+        // Show a placeholder image or error message
+        setState(() {
+          _isGeneratingImage = false;
+          // Add a caption to inform the user
+          _captions.add(
+            CaptionItem(
+              text: "Please configure Google Search API keys in settings",
+              timestamp: DateTime.now(),
+              speaker: 'System',
+              isPartial: false,
+            ),
+          );
+        });
+        return;
+      }
+      
+      // Call Google Custom Search API
+      final response = await http.get(
+        Uri.parse(
+          'https://www.googleapis.com/customsearch/v1?' +
+          'key=${_googleSearchApiKey}&' +
+          'cx=${_googleSearchEngineId}&' +
+          'q=${Uri.encodeComponent(searchQuery)}&' +
+          'searchType=image&' +
+          'num=1'
+        ),
       );
       
       print('API Response Status: ${response.statusCode}');
@@ -525,22 +647,27 @@ class _ImageCaptioningScreenState extends State<ImageCaptioningScreen> with Widg
       if (response.statusCode == 200) {
         final result = jsonDecode(response.body);
         
-        if (result.containsKey('images') && result['images'].isNotEmpty) {
-          final imageData = result['images'][0];
+        if (result.containsKey('items') && result['items'].isNotEmpty) {
+          final imageItem = result['items'][0];
           
-          if (imageData.containsKey('url') && imageData['url'].toString().startsWith('data:image')) {
+          if (imageItem.containsKey('link')) {
+            final imageUrl = imageItem['link'];
+            
             setState(() {
-              _generatedImageUrl = imageData['url'];
+              _generatedImageUrl = imageUrl;
             });
             
-            print('✅ Successfully generated image for: "$text"');
+            print('✅ Successfully found image for: "$searchQuery"');
           }
+        } else {
+          print('No images found in search results');
         }
       } else {
-        print('❌ Image generation failed: ${response.statusCode}');
+        print('❌ Image search failed: ${response.statusCode}');
+        print('Response: ${response.body}');
       }
     } catch (e) {
-      print('❌ Error generating image: $e');
+      print('❌ Error searching for image: $e');
     }
     
     setState(() {
@@ -591,67 +718,122 @@ class _ImageCaptioningScreenState extends State<ImageCaptioningScreen> with Widg
     int wordCount = _minWordsForProcessing;
     int delayMs = _streamProcessDelay;
     
+    // Get current API keys from storage
+    String apiKey = _googleSearchApiKey;
+    String engineId = _googleSearchEngineId;
+    
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
             title: const Text('Settings'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Recognition Language:'),
-                const SizedBox(height: 8),
-                DropdownButton<String>(
-                  value: currentLanguage,
-                  isExpanded: true,
-                  items: languageOptions.keys.map((name) {
-                    return DropdownMenuItem<String>(
-                      value: name,
-                      child: Text(name),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    if (value != null) {
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Recognition Language:'),
+                  const SizedBox(height: 8),
+                  DropdownButton<String>(
+                    value: currentLanguage,
+                    isExpanded: true,
+                    items: languageOptions.keys.map((name) {
+                      return DropdownMenuItem<String>(
+                        value: name,
+                        child: Text(name),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          currentLanguage = value;
+                        });
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('Minimum Words For Processing:'),
+                  Slider(
+                    value: wordCount.toDouble(),
+                    min: 1,
+                    max: 5,
+                    divisions: 4,
+                    label: wordCount.toString(),
+                    onChanged: (value) {
                       setState(() {
-                        currentLanguage = value;
+                        wordCount = value.round();
                       });
-                    }
-                  },
-                ),
-                const SizedBox(height: 16),
-                const Text('Minimum Words For Processing:'),
-                Slider(
-                  value: wordCount.toDouble(),
-                  min: 1,
-                  max: 5,
-                  divisions: 4,
-                  label: wordCount.toString(),
-                  onChanged: (value) {
-                    setState(() {
-                      wordCount = value.round();
-                    });
-                  },
-                ),
-                Text('Process after ${wordCount.toString()} words'),
-                
-                const SizedBox(height: 16),
-                const Text('Processing Delay (ms):'),
-                Slider(
-                  value: delayMs.toDouble(),
-                  min: 500,
-                  max: 2000,
-                  divisions: 6,
-                  label: delayMs.toString(),
-                  onChanged: (value) {
-                    setState(() {
-                      delayMs = value.round();
-                    });
-                  },
-                ),
-                Text('Check every ${(delayMs / 1000).toStringAsFixed(1)} seconds'),
-              ],
+                    },
+                  ),
+                  Text('Process after ${wordCount.toString()} words'),
+                  
+                  const SizedBox(height: 16),
+                  const Text('Processing Delay (ms):'),
+                  Slider(
+                    value: delayMs.toDouble(),
+                    min: 500,
+                    max: 2000,
+                    divisions: 6,
+                    label: delayMs.toString(),
+                    onChanged: (value) {
+                      setState(() {
+                        delayMs = value.round();
+                      });
+                    },
+                  ),
+                  Text('Check every ${(delayMs / 1000).toStringAsFixed(1)} seconds'),
+                  
+                  const SizedBox(height: 16),
+                  const Divider(),
+                  const SizedBox(height: 8),
+                  
+                  const Text('Google Custom Search API Settings:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 12),
+                  
+                  const Text('API Key:'),
+                  const SizedBox(height: 4),
+                  TextField(
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'Enter Google API Key',
+                      isDense: true,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    ),
+                    style: const TextStyle(fontSize: 14),
+                    obscureText: true,
+                    controller: TextEditingController(text: apiKey),
+                    onChanged: (value) {
+                      apiKey = value;
+                    },
+                  ),
+                  
+                  const SizedBox(height: 12),
+                  const Text('Custom Search Engine ID:'),
+                  const SizedBox(height: 4),
+                  TextField(
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'Enter Search Engine ID',
+                      isDense: true,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    ),
+                    style: const TextStyle(fontSize: 14),
+                    controller: TextEditingController(text: engineId),
+                    onChanged: (value) {
+                      engineId = value;
+                    },
+                  ),
+                  
+                  const SizedBox(height: 8),
+                  const Text(
+                    'You need a Google API Key and Custom Search Engine ID to use image search.',
+                    style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                  ),
+                ],
+              ),
             ),
             actions: [
               TextButton(
@@ -665,11 +847,17 @@ class _ImageCaptioningScreenState extends State<ImageCaptioningScreen> with Widg
                   await prefs.setInt('min_words_for_processing', wordCount);
                   await prefs.setInt('stream_process_delay', delayMs);
                   
+                  // Save Google API settings
+                  await prefs.setString('google_api_key', apiKey);
+                  await prefs.setString('google_cse_id', engineId);
+                  
                   if (mounted) {
                     setState(() {
                       _speechLocale = code;
                       _minWordsForProcessing = wordCount;
                       _streamProcessDelay = delayMs;
+                      _googleSearchApiKey = apiKey;
+                      _googleSearchEngineId = engineId;
                     });
                     Navigator.pop(context);
                     
@@ -831,7 +1019,7 @@ class _ImageCaptioningScreenState extends State<ImageCaptioningScreen> with Widg
                                   const CircularProgressIndicator(),
                                   const SizedBox(height: 16),
                                   Text(
-                                    'Creating your image...',
+                                    'Searching for image...',
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w500,
@@ -844,10 +1032,42 @@ class _ImageCaptioningScreenState extends State<ImageCaptioningScreen> with Widg
                           : ClipRRect(
                               borderRadius: BorderRadius.circular(16),
                               child: _generatedImageUrl != null
-                                  ? Image.memory(
-                                      base64Decode(_generatedImageUrl!.split(',')[1]),
-                                      fit: BoxFit.cover,
-                                    )
+                                  ? _generatedImageUrl!.startsWith('data:image')
+                                      ? Image.memory(
+                                          base64Decode(_generatedImageUrl!.split(',')[1]),
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) {
+                                            return Center(
+                                              child: Text(
+                                                'Error loading image',
+                                                style: TextStyle(color: Colors.red[400]),
+                                              ),
+                                            );
+                                          },
+                                        )
+                                      : Image.network(
+                                          _generatedImageUrl!,
+                                          fit: BoxFit.cover,
+                                          loadingBuilder: (context, child, loadingProgress) {
+                                            if (loadingProgress == null) return child;
+                                            return Center(
+                                              child: CircularProgressIndicator(
+                                                value: loadingProgress.expectedTotalBytes != null
+                                                    ? loadingProgress.cumulativeBytesLoaded /
+                                                        loadingProgress.expectedTotalBytes!
+                                                    : null,
+                                              ),
+                                            );
+                                          },
+                                          errorBuilder: (context, error, stackTrace) {
+                                            return Center(
+                                              child: Text(
+                                                'Error loading image',
+                                                style: TextStyle(color: Colors.red[400]),
+                                              ),
+                                            );
+                                          },
+                                        )
                                   : const SizedBox(),
                             ),
                     ),

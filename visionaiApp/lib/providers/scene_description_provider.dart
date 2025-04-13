@@ -5,10 +5,11 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import '../models/scene_description.dart';
-import '../services/openai_service.dart';
+import '../services/gemini_service.dart';
+import '../services/image_utils.dart';
 
 class SceneDescriptionProvider with ChangeNotifier {
-  final OpenAIService _openAIService = OpenAIService();
+  final GeminiService _geminiService = GeminiService();
   List<SceneDescription> _sceneHistory = [];
   SceneDescription? _currentScene;
   bool _isLoading = false;
@@ -26,6 +27,7 @@ class SceneDescriptionProvider with ChangeNotifier {
   
   // Initialize provider
   Future<void> init() async {
+    await _geminiService.initialize();
     await _loadSceneHistory();
   }
   
@@ -81,12 +83,15 @@ class SceneDescriptionProvider with ChangeNotifier {
     notifyListeners();
     
     try {
-      // Call OpenAI API to analyze the image
-      final result = await _openAIService.generateSceneDescription(_currentImageFile!);
+      // Compress the image for better performance
+      final compressedImage = await ImageUtils.adaptiveCompress(_currentImageFile!);
+      
+      // Call Gemini API to analyze the image
+      final result = await _geminiService.generateSceneDescription(compressedImage);
       
       if (result['success']) {
         // Save the image file
-        final savedImagePath = await _saveImageFile(_currentImageFile!);
+        final savedImagePath = await _saveImageFile(compressedImage);
         
         // Create a new scene description
         final newScene = SceneDescription(
@@ -126,7 +131,13 @@ class SceneDescriptionProvider with ChangeNotifier {
     notifyListeners();
     
     try {
-      final result = await _openAIService.analyzeSceneForInfo(_currentImageFile!, infoType);
+      // Compress the image for better performance
+      final compressedImage = await ImageUtils.adaptiveCompress(_currentImageFile!);
+      
+      final result = await _geminiService.askQuestionAboutImage(
+        compressedImage, 
+        _getAnalysisPromptForType(infoType)
+      );
       
       if (result['success']) {
         // Update the current scene with the analysis result
@@ -153,6 +164,22 @@ class SceneDescriptionProvider with ChangeNotifier {
     }
   }
   
+  // Get appropriate prompt for each analysis type
+  String _getAnalysisPromptForType(String infoType) {
+    switch (infoType) {
+      case 'text':
+        return 'What text is visible in this image? List all readable text content.';
+      case 'people':
+        return 'Are there any people in this image? If yes, describe their positions and what they are doing.';
+      case 'hazards':
+        return 'Are there any potential hazards or dangers in this scene that a visually impaired person should be aware of?';
+      case 'navigation':
+        return 'Describe the spatial layout of this scene in a way that would help a visually impaired person navigate it.';
+      default:
+        return 'Analyze this image for $infoType.';
+    }
+  }
+  
   // Ask a question about the current scene
   Future<void> askQuestionAboutScene(String question) async {
     if (_currentScene == null || _currentImageFile == null) {
@@ -166,7 +193,10 @@ class SceneDescriptionProvider with ChangeNotifier {
     notifyListeners();
     
     try {
-      final result = await _openAIService.askQuestionAboutImage(_currentImageFile!, question);
+      // Compress the image for better performance
+      final compressedImage = await ImageUtils.adaptiveCompress(_currentImageFile!);
+      
+      final result = await _geminiService.askQuestionAboutImage(compressedImage, question);
       
       if (result['success']) {
         // Create a new question

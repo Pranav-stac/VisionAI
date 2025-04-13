@@ -1,0 +1,6 @@
+tunnel: 033c7a69-8a3f-4e17-80db-b8e57f6e8c12
+credentials-file: C:\Users\HP\.cloudflared\033c7a69-8a3f-4e17-80db-b8e57f6e8c12.json
+ingress:
+  - hostname: vision.praanav.in
+    service: http://localhost:3000
+  - service: http_status:404 

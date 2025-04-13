@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
+import 'package:visionai/widgets/base_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -42,8 +43,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     // Use a slightly longer delay to ensure animations complete
     Timer(const Duration(seconds: 3), () {
       if (mounted) {
-        // Use GoRouter for navigation instead of Navigator
-        GoRouter.of(context).go('/onboarding');
+        // Navigate directly to home screen, skipping onboarding and login
+        GoRouter.of(context).go('/home');
       }
     });
   }
@@ -56,106 +57,62 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              colorScheme.primary.withOpacity(0.8),
-              colorScheme.primary,
-            ],
-          ),
-        ),
-        child: Center(
-          child: AnimatedBuilder(
-            animation: _animationController,
-            builder: (context, child) {
-              return FadeTransition(
-                opacity: _fadeAnimation,
-                child: ScaleTransition(
-                  scale: _scaleAnimation,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Placeholder for a Lottie animation
-                      Container(
-                        width: 200,
-                        height: 200,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 20,
-                              spreadRadius: 5,
-                            ),
-                          ],
-                        ),
-                        child: Center(
-                          child: Icon(
-                            Icons.visibility,
-                            size: 80,
-                            color: colorScheme.primary,
+    return BaseScreen(
+      builder: (context, localizedStrings) {
+        return Container(
+          color: Theme.of(context).brightness == Brightness.light
+              ? Colors.white
+              : const Color(0xFF121212),
+          child: Center(
+            child: AnimatedBuilder(
+              animation: _animationController,
+              builder: (context, child) {
+                return FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: ScaleTransition(
+                    scale: _scaleAnimation,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // You can add Lottie animation or your app logo here
+                        SizedBox(
+                          width: 200,
+                          height: 200,
+                          child: Lottie.network(
+                            'https://assets1.lottiefiles.com/packages/lf20_rhnmhzwj.json',
+                            repeat: true,
                           ),
-                          // Replace with Lottie animation in production
-                          // Lottie.asset(
-                          //   'assets/animations/vision_ai_logo.json',
-                          //   width: 180,
-                          //   height: 180,
-                          //   fit: BoxFit.contain,
-                          // ),
                         ),
-                      ),
-                      const SizedBox(height: 40),
-                      Text(
-                        'Vision AI',
-                        style: TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.onPrimary,
-                          letterSpacing: 1.2,
-                          shadows: [
-                            Shadow(
-                              color: Colors.black.withOpacity(0.1),
-                              offset: const Offset(0, 2),
-                              blurRadius: 4,
-                            ),
-                          ],
+                        const SizedBox(height: 24),
+                        Text(
+                          localizedStrings['appTitle'] ?? 'Vision AI',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).brightness == Brightness.light
+                                ? Colors.black
+                                : Colors.white,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Empowering through technology',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: colorScheme.onPrimary.withOpacity(0.9),
-                          letterSpacing: 0.5,
+                        const SizedBox(height: 8),
+                        Text(
+                          localizedStrings['welcome'] ?? 'Welcome',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Theme.of(context).brightness == Brightness.light
+                                ? Colors.black.withOpacity(0.6)
+                                : Colors.white.withOpacity(0.6),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 60),
-                      SizedBox(
-                        width: 40,
-                        height: 40,
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(colorScheme.onPrimary),
-                          strokeWidth: 3,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 } 

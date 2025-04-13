@@ -15,6 +15,8 @@ import 'screens/features/mental_health_screen.dart';
 import 'package:visionai/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:visionai/providers/language_provider.dart';
+import 'package:visionai/screens/settings/settings_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,6 +51,12 @@ Future<void> main() async {
     } catch (dbError) {
       print('Error configuring Firebase Database: $dbError');
     }
+    
+    // Initialize a dummy user since we're bypassing login
+    final AuthService authService = AuthService();
+    await authService.dummySignInWithGoogle();
+    print('Initialized app with dummy user');
+    
   } catch (e) {
     print('Error initializing Firebase: $e');
     // You might want to show an error dialog or handle the error appropriately
@@ -72,19 +80,6 @@ Future<void> main() async {
 
 final _router = GoRouter(
   initialLocation: '/',
-  redirect: (context, state) {
-    final user = Provider.of<User?>(context, listen: false);
-    final isLoggedIn = user != null;
-    final isGoingToAuth = state.fullPath == '/login' || state.fullPath == '/register';
-
-    if (!isLoggedIn && !isGoingToAuth && state.fullPath != '/onboarding') {
-      return '/login';
-    }
-    if (isLoggedIn && isGoingToAuth) {
-      return '/home';
-    }
-    return null;
-  },
   routes: [
     GoRoute(
       path: '/',
@@ -92,20 +87,23 @@ final _router = GoRouter(
     ),
     GoRoute(
       path: '/onboarding',
-      builder: (context, state) => const OnboardingScreen(),
+      builder: (context, state) => const HomeScreen(),
     ),
     GoRoute(
       path: '/login',
-      builder: (context, state) => const LoginScreen(),
+      builder: (context, state) => const HomeScreen(),
     ),
     GoRoute(
       path: '/home',
       builder: (context, state) => const HomeScreen(),
     ),
-   
     GoRoute(
       path: '/mental-health',
       builder: (context, state) => const MentalHealthScreen(),
+    ),
+    GoRoute(
+      path: '/settings',
+      builder: (context, state) => const SettingsScreen(),
     ),
   ],
 );
@@ -118,18 +116,19 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => SceneDescriptionProvider()),
-        StreamProvider<User?>.value(
-          value: AuthService().authStateChanges,
-          initialData: null,
-        ),
+        ChangeNotifierProvider(create: (_) => LanguageProvider()),
       ],
-      child: MaterialApp.router(
-        title: 'Vision AI',
-        debugShowCheckedModeBanner: false,
-        routerConfig: _router,
-        theme: AppTheme.getDarkTheme(),
-        darkTheme: AppTheme.getDarkTheme(),
-        themeMode: ThemeMode.dark,
+      child: Consumer<LanguageProvider>(
+        builder: (context, languageProvider, _) {
+          return MaterialApp.router(
+            title: 'Vision AI',
+            debugShowCheckedModeBanner: false,
+            routerConfig: _router,
+            theme: AppTheme.getDarkTheme(),
+            darkTheme: AppTheme.getDarkTheme(),
+            themeMode: ThemeMode.dark,
+          );
+        },
       ),
     );
   }
