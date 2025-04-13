@@ -125,86 +125,178 @@ How are you feeling today? We can start wherever feels most comfortable for you.
 
   useEffect(() => {
     if (embedRef.current && jsonString) {
-      vegaEmbed(embedRef.current, JSON.parse(jsonString));
+      vegaEmbed(embedRef.current, JSON.parse(jsonString), {
+        theme: 'dark', // Use dark theme for the charts
+        config: {
+          background: 'transparent',
+          axis: {
+            labelColor: 'rgba(229, 231, 235, 0.8)',
+            titleColor: 'rgba(229, 231, 235, 0.9)',
+            gridColor: 'rgba(255, 255, 255, 0.1)',
+            domainColor: 'rgba(255, 255, 255, 0.2)'
+          },
+          legend: {
+            labelColor: 'rgba(229, 231, 235, 0.8)',
+            titleColor: 'rgba(229, 231, 235, 0.9)'
+          },
+          title: {
+            color: 'rgba(229, 231, 235, 1)'
+          }
+        }
+      });
     }
   }, [embedRef, jsonString]);
   
   return (
     <>
       {isMentalHealthRoute && (
-        <div style={{
+        <div className="glass-card" style={{
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          marginBottom: '20px',
-          width: '100%'
+          marginBottom: '30px',
+          width: '100%',
+          padding: '20px',
+          borderRadius: '20px'
         }}>
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            marginBottom: '15px',
-            padding: '10px',
-            borderRadius: '8px',
-            backgroundColor: 'var(--Neutral-5)',
+            marginBottom: '20px',
+            padding: '15px',
+            borderRadius: '16px',
+            background: 'rgba(30, 30, 45, 0.5)',
             width: '100%',
-            maxWidth: '500px'
+            maxWidth: '500px',
+            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.15)',
+            border: '1px solid rgba(255, 255, 255, 0.05)',
+            boxSizing: 'border-box'
           }}>
             <div style={{
+              minWidth: '60px',
               width: '60px',
               height: '60px',
               borderRadius: '50%',
-              backgroundColor: 'var(--Blue-800)',
+              background: 'linear-gradient(135deg, var(--primary), var(--tertiary))',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               marginRight: '15px',
-              color: 'var(--Blue-500)',
+              color: 'white',
               fontWeight: 'bold',
-              fontSize: '24px'
+              fontSize: '24px',
+              boxShadow: '0 8px 20px rgba(99, 102, 241, 0.3)'
             }}>
-              DE
+              <span className="material-symbols-outlined filled" style={{ fontSize: '28px' }}>psychology</span>
             </div>
             <div>
-              <div style={{ fontWeight: 'bold', color: 'var(--Neutral-90)' }}>Dr. Sarah Ellis, PhD</div>
-              <div style={{ fontSize: '14px', color: 'var(--Neutral-60)' }}>Licensed Clinical Psychologist</div>
-              <div style={{ fontSize: '12px', color: 'var(--Blue-500)', marginTop: '3px' }}>CBT Specialist • Anxiety & Depression • Trauma</div>
+              <div style={{ 
+                fontWeight: 'bold', 
+                color: 'var(--on-surface)', 
+                fontSize: '16px',
+                marginBottom: '4px'
+              }}>Dr. Sarah Ellis, PhD</div>
+              <div style={{ 
+                fontSize: '13px', 
+                color: 'rgba(229, 231, 235, 0.7)',
+                marginBottom: '6px'
+              }}>Licensed Clinical Psychologist</div>
+              <div className="gradient-text" style={{ 
+                fontSize: '12px', 
+                marginTop: '3px'
+              }}>CBT Specialist • Anxiety & Depression • Trauma</div>
             </div>
           </div>
-          <div style={{
+          <div className="glass-card neon-glow" style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: '8px',
-            backgroundColor: 'var(--Blue-800)',
-            color: 'var(--Blue-500)',
-            padding: '5px 12px',
-            borderRadius: '20px',
+            background: 'rgba(99, 102, 241, 0.15)',
+            color: 'var(--primary)',
+            padding: '8px 16px',
+            borderRadius: '30px',
             fontSize: '12px',
             fontWeight: 'bold',
-            marginBottom: '10px'
+            marginBottom: '20px',
+            border: '1px solid rgba(99, 102, 241, 0.3)'
           }}>
-            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>headphones</span>
+            <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>headphones</span>
             VOICE-ONLY THERAPY SESSION
           </div>
           <p style={{ 
             fontSize: '14px', 
-            color: 'var(--Neutral-60)',
+            color: 'rgba(229, 231, 235, 0.8)',
             fontStyle: 'italic',
             textAlign: 'center',
-            maxWidth: '400px'
+            maxWidth: '450px',
+            lineHeight: '1.5',
+            letterSpacing: '0.2px'
           }}>
             Speak naturally to begin your session with Dr. Ellis.
             Your voice interactions are confidential and secure.
           </p>
         </div>
       )}
-      <div className="vega-embed" ref={embedRef} style={{
+      <div className="vega-embed glass-card" ref={embedRef} style={{
         width: '100%',
-        padding: '10px',
-        borderRadius: '8px',
-        backgroundColor: isMentalHealthRoute ? 'var(--Neutral-5)' : 'transparent',
-        border: isMentalHealthRoute ? '1px solid var(--Neutral-20)' : 'none'
-      }} />
+        padding: '20px',
+        borderRadius: '16px',
+        backgroundColor: 'rgba(30, 30, 45, 0.5)',
+        border: '1px solid rgba(255, 255, 255, 0.05)',
+        minHeight: '200px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        {!jsonString && (
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+            textAlign: 'center',
+            width: '100%'
+          }}>
+            <div className="pulse" style={{
+              width: '70px',
+              height: '70px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, var(--primary) 0%, var(--tertiary) 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '20px',
+              boxShadow: '0 0 20px rgba(99, 102, 241, 0.4)'
+            }}>
+              <span className="material-symbols-outlined" style={{ 
+                fontSize: '35px', 
+                color: 'white'
+              }}>
+                record_voice_over
+              </span>
+            </div>
+            <h3 className="gradient-text" style={{ 
+              fontSize: '18px', 
+              marginBottom: '15px',
+              fontWeight: '600'
+            }}>
+              Your Mental Health Assistant
+            </h3>
+            <p style={{ 
+              color: 'rgba(229, 231, 235, 0.7)',
+              fontSize: '14px',
+              maxWidth: '400px',
+              lineHeight: '1.6'
+            }}>
+              Speak or type to start a conversation. 
+              I'm here to listen, understand, and provide guidance 
+              for your mental wellbeing journey.
+            </p>
+          </div>
+        )}
+      </div>
     </>
   );
 }

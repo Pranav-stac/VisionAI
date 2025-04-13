@@ -1,61 +1,102 @@
 :root {
-  --text: #333333;
-  --gray-200: #e0e0e0;
-  --gray-300: #b0b0b0;
-  --gray-500: #808080;
-  --gray-600: #606060;
-  --gray-700: #404040;
-  --gray-800: #303030;
-  --gray-900: #f5f5f5;
-  --gray-1000: #ffffff;
-  --border-stroke: #d0d0d0;
-  --accent-blue: #8ecdf7;
-  --accent-blue-active-bg: #e8f4fd;
-  --accent-blue-active: #4a9bd8;
-  --accent-blue-headers: #2884d8;
-  --accent-green: #a8dab5;
+  /* Dark Mode Color Palette from visionaiApp */
+  --primary: #6366F1;         /* Electric indigo */
+  --secondary: #EC4899;       /* Vibrant pink */
+  --tertiary: #9333EA;        /* Purple */
+  --surface: #1E1E2D;         /* Dark blue-grey */
+  --background: #121212;      /* Dark charcoal */
+  --error: #EF4444;           /* Error red */
+  --on-primary: #E5E7EB;      /* Light grey */
+  --on-surface: #E5E7EB;      /* Light grey */
+  --on-background: #E5E7EB;   /* Light grey */
+  --card-bg: rgba(30, 30, 45, 0.85);
+  
+  /* Legacy variables mapped to new color scheme */
+  --text: var(--on-surface);
+  --gray-200: #2A2A3A;
+  --gray-300: #3A3A4A;
+  --gray-500: #4A4A5A;
+  --gray-600: #5A5A6A;
+  --gray-700: #6A6A7A;
+  --gray-800: #8A8A9A;
+  --gray-900: #3A3A4A;
+  --gray-1000: var(--background);
+  --border-stroke: #3A3A4A;
+  --accent-blue: var(--primary);
+  --accent-blue-active-bg: rgba(99, 102, 241, 0.2);
+  --accent-blue-active: var(--primary);
+  --accent-blue-headers: var(--primary);
+  --accent-green: #10B981;
+  --accent-red: var(--error);
 
-  --midnight-blue: #e8f4fd;
-  --blue-30: #4a9bd8;
+  --midnight-blue: var(--surface);
+  --blue-30: var(--primary);
 
-  --accent-red: #f06060;
+  --background: var(--background);
+  --color: var(--on-background);
 
-  --background: var(--gray-1000);
-  --color: var(--text);
-
-  scrollbar-color: var(--gray-300) var(--gray-200);
+  scrollbar-color: var(--gray-500) var(--gray-300);
   scrollbar-width: thin;
 
-  --font-family: "Space Mono", monospace;
+  --font-family: "Inter", sans-serif;
 
-  /* */
-  --Neutral-00: #ffffff;
-  --Neutral-5: #f8f8f8;
-  --Neutral-10: #f0f0f0;
-  --Neutral-15: #e8e8e8;
-  --Neutral-20: #e0e0e0;
-  --Neutral-30: #d0d0d0;
-  --Neutral-50: #a0a0a0;
-  --Neutral-60: #808080;
-  --Neutral-80: #505050;
-  --Neutral-90: #333333;
+  /* Neutral colors */
+  --Neutral-00: #1E1E2D;
+  --Neutral-5: #1A1A28;
+  --Neutral-10: #2A2A3A;
+  --Neutral-15: #333342;
+  --Neutral-20: #3A3A4A;
+  --Neutral-30: #4A4A5A;
+  --Neutral-50: #5A5A6A;
+  --Neutral-60: #8A8A9A;
+  --Neutral-80: #AAAABC;
+  --Neutral-90: #E5E7EB;
 
-  --Green-500: #4caf50;
-  --Green-700: #2e7d32;
+  --Green-500: #10B981;
+  --Green-700: #059669;
 
-  --Blue-500: #4a9bd8;
-  --Blue-800: #d4eaff;
+  --Blue-500: var(--primary);
+  --Blue-800: rgba(99, 102, 241, 0.2);
 
-  --Red-400: #f8c9c9;
-  --Red-500: #f06060;
-  --Red-600: #e04545;
-  --Red-700: #d03030;
+  --Red-400: rgba(239, 68, 68, 0.3);
+  --Red-500: #EF4444;
+  --Red-600: #DC2626;
+  --Red-700: #B91C1C;
+  
+  /* Add glass morphism variables */
+  --glass-bg: rgba(30, 30, 45, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--gray-300);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gray-600);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
 }
 
 body {
-  font-family: "Space Mono", monospace;
-  background: var(--Neutral-5);
-  color: var(--Neutral-90);
+  font-family: var(--font-family);
+  background: var(--background);
+  color: var(--on-background);
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  transition: all 0.3s ease;
 }
 
 .material-symbols-outlined {
@@ -115,21 +156,29 @@ body {
 @media (prefers-reduced-motion: no-preference) {}
 
 .streaming-console {
-  background: var(--Neutral-5);
-  color: var(--Neutral-90);
+  background: var(--background);
+  color: var(--on-background);
   display: flex;
   height: 100vh;
   width: 100vw;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
 
   a,
   a:visited,
   a:active {
-    color: var(--Neutral-60);
+    color: var(--primary);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      color: var(--secondary);
+      text-decoration: underline;
+    }
   }
 
   .disabled {
     pointer-events: none;
+    opacity: 0.6;
 
     >* {
       pointer-events: none;
@@ -146,6 +195,8 @@ body {
     gap: 1rem;
     max-width: 100%;
     overflow: hidden;
+    padding: 0 20px;
+    box-sizing: border-box;
   }
 
   .main-app-area {
@@ -153,11 +204,22 @@ body {
     flex: 1;
     align-items: center;
     justify-content: center;
-    background-color: var(--Neutral-00);
-    border-radius: 12px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-    padding: 20px;
-    margin: 15px;
+    background-color: var(--surface);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    padding: 25px;
+    margin: 15px auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    width: 100%;
+    max-width: 800px;
+    
+    &:hover {
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3), 
+                  0 0 15px rgba(99, 102, 241, 0.3);
+    }
   }
 
   .function-call {
@@ -166,6 +228,11 @@ body {
     width: 100%;
     height: 50%;
     overflow-y: auto;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 15px;
+    border: 1px solid var(--glass-border);
   }
 }
 
@@ -175,8 +242,17 @@ body {
   max-width: 90%;
   border-radius: 18px;
   max-height: fit-content;
-  border: 2px solid var(--Neutral-20);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  border: 2px solid var(--glass-border);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2),
+              0 0 15px rgba(99, 102, 241, 0.2);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.01);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3),
+                0 0 20px rgba(99, 102, 241, 0.4);
+  }
 }
 
 // Mobile optimizations
@@ -188,6 +264,7 @@ body {
     position: fixed;
     top: 0;
     left: 0;
+    box-sizing: border-box;
   }
 
   .streaming-console {
@@ -199,7 +276,9 @@ body {
   main {
     height: calc(100% - 40vh);
     position: relative;
-    padding-bottom: 60px; /* Space for control tray */
+    padding: 0 15px 60px; /* Space for control tray and horizontal padding */
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .main-app-area {
@@ -212,6 +291,10 @@ body {
     align-items: center;
     width: 100%;
     height: 100%;
+    padding: 15px;
+    margin: 10px auto;
+    max-width: 450px;
+    box-sizing: border-box;
   }
 
   // Hide video on mobile, keeping only audio
@@ -225,9 +308,10 @@ body {
     max-height: 40vh !important;
     position: relative !important;
     z-index: 999 !important;
-    background-color: var(--Neutral-00) !important;
-    border-radius: 12px 12px 0 0 !important;
-    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05) !important;
+    background-color: var(--surface) !important;
+    border-radius: 16px 16px 0 0 !important;
+    box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.2) !important;
+    border-top: 1px solid var(--glass-border) !important;
   }
 
   .side-panel-container {
@@ -245,17 +329,34 @@ body {
     position: fixed;
     bottom: 0;
     left: 0;
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: rgba(30, 30, 45, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     z-index: 1001;
-    padding: 10px;
+    padding: 15px;
+    border-top: 1px solid var(--glass-border);
+    display: flex;
+    justify-content: center;
+    transform: none;
     box-sizing: border-box;
-    backdrop-filter: blur(5px);
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
   }
-
-  .vega-embed {
-    width: 100% !important;
-    max-width: 90vw !important;
+  
+  /* Adjust header for mobile */
+  header.glass-card {
+    width: 90% !important;
+    max-width: 350px;
+    box-sizing: border-box;
+  }
+  
+  /* Fix main content area vertical spacing */
+  main {
+    margin-top: 80px !important;
+  }
+  
+  /* Adjust voice indicator position for mobile */
+  .glass-card.pulse {
+    bottom: 80px !important;
+    right: 20px !important;
   }
 }
 
@@ -274,4 +375,50 @@ html, body {
   .control-tray {
     padding-bottom: env(safe-area-inset-bottom);
   }
+}
+
+/* Glass morphism card */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: var(--glass-shadow);
+}
+
+/* Neon glow effect */
+.neon-glow {
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.5),
+              0 0 20px rgba(99, 102, 241, 0.3),
+              0 0 30px rgba(99, 102, 241, 0.1);
+}
+
+/* Pulsing animation */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.pulse {
+  animation: pulse 3s infinite ease-in-out;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: bold;
 }
