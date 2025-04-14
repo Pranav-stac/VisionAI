@@ -182,6 +182,7 @@ function ControlTray({
         <button
           className={cn("action-button mic-button", { active: !muted && inVolume > 0.05 })}
           onClick={() => setMuted(!muted)}
+          aria-label={muted ? "Unmute microphone" : "Mute microphone"}
         >
           {!muted ? (
             <span className="material-symbols-outlined filled">mic</span>
@@ -193,11 +194,11 @@ function ControlTray({
               position: 'absolute', 
               top: '-5px', 
               right: '-5px', 
-              width: '10px', 
-              height: '10px', 
+              width: '12px', 
+              height: '12px', 
               borderRadius: '50%', 
               backgroundColor: '#00ff00',
-              boxShadow: '0 0 5px #00ff00'
+              boxShadow: '0 0 8px #00ff00'
             }}></span>
           )}
         </button>
@@ -224,14 +225,18 @@ function ControlTray({
             />
             {webcam.isStreaming && (
               <div className="camera-type-indicator" style={{
-                fontSize: '10px',
+                fontSize: '11px',
                 position: 'absolute',
                 bottom: '32px',
                 right: '86px',
                 color: 'white',
-                backgroundColor: 'rgba(0,0,0,0.5)',
-                padding: '2px 4px',
-                borderRadius: '4px'
+                backgroundColor: 'rgba(0,0,0,0.7)',
+                padding: '3px 6px',
+                borderRadius: '8px',
+                fontWeight: 'bold',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+                backdropFilter: 'blur(4px)',
+                border: '1px solid rgba(255,255,255,0.1)'
               }}>
                 {webcam.isBackCamera ? 'BACK CAM' : 'FRONT CAM'}
               </div>
@@ -247,13 +252,17 @@ function ControlTray({
             ref={connectButtonRef}
             className={cn("action-button connect-toggle", { connected })}
             onClick={connected ? disconnect : connect}
+            aria-label={connected ? "Stop streaming" : "Start streaming"}
           >
             <span className="material-symbols-outlined filled">
               {connected ? "pause" : "play_arrow"}
             </span>
+            {!connected && (
+              <span className="pulse-ring"></span>
+            )}
           </button>
         </div>
-        <span className="text-indicator">Streaming</span>
+        <span className="text-indicator">{connected ? 'Streaming' : ''}</span>
       </div>
     </section>
   );

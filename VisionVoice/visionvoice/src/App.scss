@@ -185,12 +185,13 @@ body {
     flex-direction: column;
     height: 100%;
     width: 100%;
+    overflow: hidden;
   }
 
   main {
     height: calc(100% - 40vh);
     position: relative;
-    padding-bottom: 60px; /* Space for control tray */
+    padding-bottom: 80px; /* Increased space for control tray */
   }
 
   .main-app-area {
@@ -208,11 +209,49 @@ body {
   // Make the video view more prominent on mobile
   .stream {
     position: fixed !important;
-    top: 5px !important;
-    right: 5px !important;
-    width: 45% !important;
+    top: calc(env(safe-area-inset-top, 10px) + 30px) !important; // Extra space for heading
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    width: 85% !important;
+    max-width: 400px !important;
     height: auto !important;
     z-index: 1000 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5) !important;
+    border: 2px solid rgba(255, 255, 255, 0.1) !important;
+    object-fit: cover !important;
+    aspect-ratio: 4/3 !important;
+  }
+
+  // Additional style for portrait orientation
+  @media (orientation: portrait) {
+    .stream {
+      top: calc(env(safe-area-inset-top, 10px) + 36px) !important; // Extra space for heading
+      width: 90% !important;
+      max-width: 450px !important;
+      aspect-ratio: 4/3 !important;
+    }
+    
+    .vega-embed {
+      margin-top: 280px !important;
+    }
+  }
+  
+  // Additional style for landscape orientation
+  @media (orientation: landscape) {
+    .stream {
+      width: 45% !important;
+      right: auto !important;
+      top: calc(env(safe-area-inset-top, 10px) + 36px) !important;
+      transform: translateX(-50%) !important;
+      left: 50% !important;
+    }
+    
+    .vega-embed {
+      margin-top: 180px !important;
+      margin-right: 0 !important;
+    }
   }
 
   .side-panel {
@@ -238,17 +277,23 @@ body {
     position: fixed;
     bottom: 0;
     left: 0;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0.85);
     z-index: 1001;
-    padding: 10px;
+    padding: 15px;
     box-sizing: border-box;
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
   }
 
   .vega-embed {
     width: 100% !important;
     max-width: 90vw !important;
-    margin-top: 50px !important;
+    margin-top: 200px !important; /* More space for camera */
   }
 }
 
@@ -265,6 +310,6 @@ html, body {
   }
   
   .control-tray {
-    padding-bottom: env(safe-area-inset-bottom);
+    padding-bottom: calc(env(safe-area-inset-bottom) + 10px);
   }
 }

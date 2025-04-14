@@ -1,0 +1,13 @@
+cd VisionVoice
+cd VisionMentalHealth
+npm start
+cloudflared tunnel --config config.yml run pranav-stac
+
+vision.praanav.in
+
+cd VisionVoice
+cd VisionVoice
+npm start
+cloudflared tunnel --config config.yml run visionvoice-app
+
+voice.praanav.in

@@ -70,7 +70,7 @@ function App() {
           <main>
             <div className="main-app-area">
               {/* Position video centered for voice with camera mode */}
-              <div style={{ position: 'relative' }}>
+              <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                 <video
                   className={cn("stream", {
                     hidden: !videoRef.current || !videoStream,
@@ -79,33 +79,37 @@ function App() {
                   autoPlay
                   playsInline
                   muted
-                  style={{
-                    position: 'absolute',
-                    top: '10px',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    width: isMobile ? '50%' : '250px',
-                    height: 'auto',
-                    borderRadius: '8px',
-                    zIndex: 10,
-                    boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
-                  }}
                 />
                 {videoStream && (
                   <div style={{
                     position: 'absolute',
-                    top: '15px',
+                    top: '0',
                     left: '50%',
                     transform: 'translateX(-50%)',
-                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    backgroundColor: 'black',
                     color: 'white',
-                    padding: '4px 8px',
-                    borderRadius: '4px',
-                    fontSize: isMobile ? '14px' : '12px',
+                    padding: '10px 20px',
+                    borderRadius: '0 0 16px 16px',
+                    fontSize: isMobile ? '20px' : '16px',
                     fontWeight: 'bold',
-                    zIndex: 11
+                    zIndex: 11,
+                    letterSpacing: '3px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    textAlign: 'center',
+                    width: 'auto',
+                    minWidth: '180px',
+                    textTransform: 'uppercase',
+                    fontFamily: "'Space Mono', monospace"
                   }}>
-                    VISION AI
+                    <span style={{ 
+                      background: 'linear-gradient(120deg, #ffffff, #1f94ff)', 
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      display: 'inline-block'
+                    }}>
+                      Vision AI
+                    </span>
                   </div>
                 )}
                 {cameraPermission === 'denied' && (
@@ -114,16 +118,18 @@ function App() {
                     top: '50%',
                     left: '50%',
                     transform: 'translate(-50%, -50%)',
-                    backgroundColor: 'rgba(220, 53, 69, 0.8)',
+                    backgroundColor: 'rgba(220, 53, 69, 0.9)',
                     color: 'white',
-                    padding: '12px 16px',
-                    borderRadius: '8px',
+                    padding: '16px 20px',
+                    borderRadius: '12px',
                     textAlign: 'center',
                     zIndex: 100,
-                    maxWidth: '90%'
+                    maxWidth: '90%',
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.4)',
+                    backdropFilter: 'blur(8px)'
                   }}>
-                    <div style={{ fontSize: '18px', marginBottom: '8px' }}>Camera Permission Required</div>
-                    <div>Please enable camera access in your browser settings to use this app.</div>
+                    <div style={{ fontSize: '20px', marginBottom: '12px', fontWeight: 'bold' }}>Camera Permission Required</div>
+                    <div style={{ fontSize: '16px', lineHeight: '1.4' }}>Please enable camera access in your browser settings to use this app.</div>
                   </div>
                 )}
               </div>
