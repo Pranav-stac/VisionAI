@@ -2,30 +2,33 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--Neutral-10);
-  color: var(--Neutral-90);
+  background: var(--surface);
+  color: var(--on-surface);
   font-size: 1.25rem;
   line-height: 1.75rem;
   text-transform: lowercase;
   cursor: pointer;
   animation: opacity-pulse 3s ease-in infinite;
-  transition: all 0.2s ease-in-out;
+  transition: all 0.3s ease;
   width: 48px;
   height: 48px;
   border-radius: 18px;
-  border: 1px solid var(--Neutral-20);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   user-select: none;
   cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 
   &:focus {
-    border: 2px solid var(--Neutral-20);
-    outline: 2px solid var(--Blue-500);
+    border: 2px solid var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
   }
 
   &.outlined {
-    background: var(--Neutral-00);
-    border: 1px solid var(--Neutral-20);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
   }
 
   .no-action {
@@ -33,18 +36,23 @@
   }
 
   &:hover {
-    background: var(--Neutral-5);
-    border: 1px solid var(--Neutral-30);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background: var(--Neutral-10);
+    border: 1px solid var(--primary);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2),
+                0 0 15px rgba(99, 102, 241, 0.3);
   }
 
   &.connected {
-    background: var(--Blue-800);
-    color: var(--Blue-500);
+    background: rgba(99, 102, 241, 0.2);
+    color: var(--primary);
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.3),
+                0 0 20px rgba(99, 102, 241, 0.1);
 
     &:hover {
-      border: 1px solid var(--Blue-500);
+      border: 1px solid var(--primary);
+      box-shadow: 0 0 15px rgba(99, 102, 241, 0.5),
+                  0 0 30px rgba(99, 102, 241, 0.2);
     }
   }
 }
@@ -64,18 +72,22 @@
 
 .mic-button {
   position: relative;
-  background-color: var(--accent-red);
+  background-color: var(--error);
   z-index: 1;
   color: white;
-  transition: all 0.2s ease-in;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3);
 
   &:focus {
-    border: 2px solid var(--Neutral-20);
-    outline: 2px solid var(--Red-500);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.5);
   }
 
   &:hover {
-    background-color: var(--Red-400);
+    background-color: var(--Red-600);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
   }
 
   &:before {
@@ -86,23 +98,41 @@
     display: block;
     content: "";
     opacity: 0.35;
-    background-color: var(--Red-500);
+    background-color: var(--error);
     width: calc(100% + var(--volume) * 2);
     height: calc(100% + var(--volume) * 2);
     border-radius: 24px;
     transition: all 0.02s ease-in-out;
   }
+  
+  &:active {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
+  }
 }
 
 .connect-toggle {
   &:focus {
-    border: 2px solid var(--Neutral-20);
-    outline: 2px solid var(--Blue-500);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
   }
 
   &:not(.connected) {
-    background-color: var(--Blue-500);
+    background-color: var(--primary);
     color: white;
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+    
+    &:hover {
+      background-color: var(--primary);
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+      transform: translateY(-3px) scale(1.05);
+    }
+    
+    &:active {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+    }
   }
 }
 
@@ -114,15 +144,16 @@
   display: inline-flex;
   justify-content: center;
   align-items: flex-start;
-  gap: 8px;
+  gap: 12px;
   padding-bottom: 18px;
 
   .disabled .action-button,
   .action-button.disabled {
     background: var(--Neutral-10);
-    border: 1px solid var(--Neutral-30);
-    color: var(--Neutral-50);
+    border: 1px solid var(--Neutral-20);
+    color: var(--Neutral-30);
     box-shadow: none;
+    transform: none;
   }
 
   .connection-container {
@@ -130,20 +161,26 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
 
     .connection-button-container {
       border-radius: 27px;
-      border: 1px solid var(--Neutral-30);
-      background: var(--Neutral-5);
-      padding: 10px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--glass-border);
+      background: var(--glass-bg);
+      padding: 12px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
 
     .text-indicator {
       font-size: 11px;
-      color: var(--Blue-500);
+      color: var(--primary);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
       user-select: none;
+      text-shadow: 0 0 5px rgba(99, 102, 241, 0.5);
     }
 
     &:not(.connected) {
@@ -155,16 +192,23 @@
 }
 
 .actions-nav {
-  background: var(--Neutral-5);
-  border: 1px solid var(--Neutral-30);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: 27px;
   display: inline-flex;
   gap: 12px;
   align-items: center;
   overflow: clip;
-  padding: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: all 0.6s ease-in;
+  padding: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.4s ease;
+  
+  &:hover {
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3),
+                0 0 15px rgba(99, 102, 241, 0.2);
+  }
 
   &>* {
     display: flex;
@@ -185,5 +229,93 @@
 
   100% {
     opacity: 0.9;
+  }
+}
+
+/* Pulse animation for recording button */
+@keyframes recording-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(239, 68, 68, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+.recording {
+  animation: recording-pulse 2s infinite;
+}
+
+/* Gradient borders */
+.gradient-border {
+  position: relative;
+  
+  &:before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 18px;
+    padding: 2px;
+    background: linear-gradient(225deg, var(--primary), var(--secondary), var(--tertiary));
+    -webkit-mask: 
+      linear-gradient(#fff 0 0) content-box, 
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .control-tray {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    transform: none;
+    padding-bottom: env(safe-area-inset-bottom, 10px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+  }
+  
+  .actions-nav {
+    gap: 10px;
+    padding: 10px;
+    width: auto;
+    justify-content: center;
+    margin: 0 auto;
+  }
+  
+  .action-button {
+    width: 44px;
+    height: 44px;
+    font-size: 1.1rem;
+  }
+  
+  .connection-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .connection-container .connection-button-container {
+    padding: 10px;
+  }
+  
+  .connection-container .text-indicator {
+    font-size: 10px;
+  }
+}
+
+/* Fix for iOS Safari viewport height issues */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .control-tray {
+    padding-bottom: env(safe-area-inset-bottom, 18px);
   }
 }
