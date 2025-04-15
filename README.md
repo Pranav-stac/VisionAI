@@ -2,7 +2,7 @@
 
 # 🌟 Vision AI - Empowering Everyone  
 
-[![Download APK](https://img.shields.io/badge/Download-APK-green?style=for-the-badge&logo=android)](https://appho.st/d/8Yh7AmZE)
+[![Download APK](https://img.shields.io/badge/Download-APK-green?style=for-the-badge&logo=android)](https://appho.st/d/7JoCQTxv)
 Directly click on login with Google for testing 
 
 A groundbreaking assistive technology platform designed to enhance accessibility for individuals with visual, hearing, speech, cognitive, and physical impairments.  
@@ -241,7 +241,7 @@ This project is licensed under the **MIT License** – See `LICENSE` for details
 
 📩 **Contact & Support:** support@visionai.org  
 
-[![Download Our App](https://img.shields.io/badge/Download-Our_App-blue?style=for-the-badge&logo=android)](https://example.com/download-vision-ai)  
+[![Download Our App](https://img.shields.io/badge/Download-Our_App-blue?style=for-the-badge&logo=android)](https://appho.st/d/7JoCQTxv)  
 
 ---
 
