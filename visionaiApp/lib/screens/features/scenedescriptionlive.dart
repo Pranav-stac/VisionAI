@@ -13,7 +13,7 @@ class SceneDescriptionlive extends StatefulWidget {
 class _SceneDescriptionliveState extends State<SceneDescriptionlive> {
   InAppWebViewController? _webViewController;
   bool _isLoading = true;
-  final String _webUrl = 'https://voice.praanav.in';
+  final String _webUrl = 'https://useful-herring-radically.ngrok-free.app';
 
   @override
   void initState() {
@@ -34,9 +34,22 @@ class _SceneDescriptionliveState extends State<SceneDescriptionlive> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+            title: Text('Scene Description'),
+            elevation: 0,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: () {
+                  _webViewController?.reload();
+                },
+              ),
+            ],
+          ),
       
       body: Stack(
         children: [
+        
           InAppWebView(
             initialUrlRequest: URLRequest(url: Uri.parse(_webUrl)),
             initialOptions: InAppWebViewGroupOptions(

@@ -8,6 +8,6 @@ vision.praanav.in
 cd VisionVoice
 cd VisionVoice
 npm start
-cloudflared tunnel --config config.yml run visionvoice-app
+cloudflared tunnel --config config.yml --protocol http2 run visionvoice-app
 
 voice.praanav.in

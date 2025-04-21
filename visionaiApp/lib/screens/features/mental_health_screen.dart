@@ -13,7 +13,7 @@ class MentalHealthScreen extends StatefulWidget {
 class _MentalHealthScreenState extends State<MentalHealthScreen> {
   InAppWebViewController? _webViewController;
   bool _isLoading = true;
-  final String _webUrl = 'https://vision.praanav.in';
+  final String _webUrl = 'https://cheerful-apparent-hound.ngrok-free.app';
 
   @override
   void initState() {
@@ -50,10 +50,12 @@ class _MentalHealthScreenState extends State<MentalHealthScreen> {
           ),
           body: Stack(
             children: [
+              AppBar(
+                title: Text('Mental Health'),
+                centerTitle: true,
+              ),
               InAppWebView(
-                initialUrlRequest: URLRequest(
-                  url: Uri.parse(_webUrl),
-                ),
+                initialUrlRequest: URLRequest(url: Uri.parse(_webUrl)),
                 initialOptions: InAppWebViewGroupOptions(
                   crossPlatform: InAppWebViewOptions(
                     useShouldOverrideUrlLoading: true,

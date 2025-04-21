@@ -1,5 +1,6 @@
 tunnel: 9aab098a-df26-4b67-bb40-ae2c4b8bc32c
 credentials-file: C:\Users\HP\.cloudflared\9aab098a-df26-4b67-bb40-ae2c4b8bc32c.json
+protocol: http2
 ingress:
   - hostname: voice.praanav.in
     service: http://localhost:3001

@@ -72,10 +72,12 @@ class _ImageCaptioningScreenState extends State<ImageCaptioningScreen> with Widg
   // Add these variables at the class level
   DateTime _lastProcessTime = DateTime.now().subtract(Duration(days: 1));
   bool _isProcessingText = false;
-
-  // Add these variables for Google Search API
-  String _googleSearchApiKey = 'AIzaSyAdLio3yM6yxC9jDz0BA9LKhhXh0hbDts4'; // Replace with your actual API key
-  String _googleSearchEngineId = '02b947281690f4e71'; // Replace with your actual Search Engine ID
+  
+  // Timer for backup listening check
+  Timer? _backupTimer;
+  
+  // Timer to monitor if listening stopped unexpectedly
+  Timer? _listeningMonitorTimer;
 
   @override
   void initState() {
@@ -86,9 +88,6 @@ class _ImageCaptioningScreenState extends State<ImageCaptioningScreen> with Widg
     _speech = stt.SpeechToText();
     _initSpeech();
     _loadPreferences();
-    
-    // Load API keys from secure storage
-    _loadApiKeys();
   }
 
   @override
@@ -290,15 +289,6 @@ class _ImageCaptioningScreenState extends State<ImageCaptioningScreen> with Widg
     });
   }
 
-  // Load API keys from secure storage
-  Future<void> _loadApiKeys() async {
-    final prefs = await SharedPreferences.getInstance();
-    
-    // Get stored keys if available
-    _googleSearchApiKey = prefs.getString('google_api_key') ?? _googleSearchApiKey;
-    _googleSearchEngineId = prefs.getString('google_cse_id') ?? _googleSearchEngineId;
-  }
-
   void _toggleListening() {
     if (_isListening) {
       _stopListening();
@@ -314,9 +304,6 @@ class _ImageCaptioningScreenState extends State<ImageCaptioningScreen> with Widg
     }
   }
 
-  // Timer for backup listening check
-  Timer? _backupTimer;
-  
   void _startListening() async {
     if (!_speechAvailable) {
       print('Speech recognition not available');
@@ -605,69 +592,61 @@ class _ImageCaptioningScreenState extends State<ImageCaptioningScreen> with Widg
     });
     
     try {
-      // Extract action words for better search results
+      // Extract action words for better results
       final searchQuery = _extractActionWords(text);
       
-      print('🔍 SEARCHING IMAGES FOR: "$searchQuery"');
+      print('🔍 GENERATING IMAGE FOR: "$searchQuery"');
       
-      // Check if API keys are set
-      if (_googleSearchApiKey.isEmpty || _googleSearchEngineId.isEmpty) {
-        print('❌ Google Search API keys not configured');
-        
-        // Show a placeholder image or error message
-        setState(() {
-          _isGeneratingImage = false;
-          // Add a caption to inform the user
-          _captions.add(
-            CaptionItem(
-              text: "Please configure Google Search API keys in settings",
-              timestamp: DateTime.now(),
-              speaker: 'System',
-              isPartial: false,
-            ),
-          );
-        });
-        return;
-      }
-      
-      // Call Google Custom Search API
+      // Call the provided API endpoint at pix.praanav.in
       final response = await http.get(
         Uri.parse(
-          'https://www.googleapis.com/customsearch/v1?' +
-          'key=${_googleSearchApiKey}&' +
-          'cx=${_googleSearchEngineId}&' +
-          'q=${Uri.encodeComponent(searchQuery)}&' +
-          'searchType=image&' +
-          'num=1'
+          'https://pix.praanav.in/generate-image?text=${Uri.encodeComponent(searchQuery)}'
         ),
       );
       
       print('API Response Status: ${response.statusCode}');
       
       if (response.statusCode == 200) {
-        final result = jsonDecode(response.body);
+        // The API returns the image directly, so we can use the response as the URL
+        // Create a data URL from the image bytes
+        final String base64Image = base64Encode(response.bodyBytes);
+        final imageUrl = 'data:image/jpeg;base64,$base64Image';
         
-        if (result.containsKey('items') && result['items'].isNotEmpty) {
-          final imageItem = result['items'][0];
-          
-          if (imageItem.containsKey('link')) {
-            final imageUrl = imageItem['link'];
-            
-            setState(() {
-              _generatedImageUrl = imageUrl;
-            });
-            
-            print('✅ Successfully found image for: "$searchQuery"');
-          }
-        } else {
-          print('No images found in search results');
-        }
+        setState(() {
+          _generatedImageUrl = imageUrl;
+        });
+        
+        print('✅ Successfully generated image for: "$searchQuery"');
       } else {
-        print('❌ Image search failed: ${response.statusCode}');
+        print('❌ Image generation failed: ${response.statusCode}');
         print('Response: ${response.body}');
+        
+        // Add error message to captions
+        setState(() {
+          _captions.add(
+            CaptionItem(
+              text: "Failed to generate image. Please try again.",
+              timestamp: DateTime.now(),
+              speaker: 'System',
+              isPartial: false,
+            ),
+          );
+        });
       }
     } catch (e) {
-      print('❌ Error searching for image: $e');
+      print('❌ Error generating image: $e');
+      
+      // Add error message to captions
+      setState(() {
+        _captions.add(
+          CaptionItem(
+            text: "Error generating image: $e",
+            timestamp: DateTime.now(),
+            speaker: 'System',
+            isPartial: false,
+          ),
+        );
+      });
     }
     
     setState(() {
@@ -717,10 +696,6 @@ class _ImageCaptioningScreenState extends State<ImageCaptioningScreen> with Widg
     // Settings for streaming parameters
     int wordCount = _minWordsForProcessing;
     int delayMs = _streamProcessDelay;
-    
-    // Get current API keys from storage
-    String apiKey = _googleSearchApiKey;
-    String engineId = _googleSearchEngineId;
     
     showDialog(
       context: context,
@@ -788,50 +763,11 @@ class _ImageCaptioningScreenState extends State<ImageCaptioningScreen> with Widg
                   const Divider(),
                   const SizedBox(height: 8),
                   
-                  const Text('Google Custom Search API Settings:',
+                  const Text('Image Generation',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
-                  
-                  const Text('API Key:'),
-                  const SizedBox(height: 4),
-                  TextField(
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'Enter Google API Key',
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    ),
-                    style: const TextStyle(fontSize: 14),
-                    obscureText: true,
-                    controller: TextEditingController(text: apiKey),
-                    onChanged: (value) {
-                      apiKey = value;
-                    },
-                  ),
-                  
-                  const SizedBox(height: 12),
-                  const Text('Custom Search Engine ID:'),
-                  const SizedBox(height: 4),
-                  TextField(
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'Enter Search Engine ID',
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    ),
-                    style: const TextStyle(fontSize: 14),
-                    controller: TextEditingController(text: engineId),
-                    onChanged: (value) {
-                      engineId = value;
-                    },
-                  ),
-                  
-                  const SizedBox(height: 8),
-                  const Text(
-                    'You need a Google API Key and Custom Search Engine ID to use image search.',
-                    style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
-                  ),
+                
                 ],
               ),
             ),
@@ -847,17 +783,11 @@ class _ImageCaptioningScreenState extends State<ImageCaptioningScreen> with Widg
                   await prefs.setInt('min_words_for_processing', wordCount);
                   await prefs.setInt('stream_process_delay', delayMs);
                   
-                  // Save Google API settings
-                  await prefs.setString('google_api_key', apiKey);
-                  await prefs.setString('google_cse_id', engineId);
-                  
                   if (mounted) {
                     setState(() {
                       _speechLocale = code;
                       _minWordsForProcessing = wordCount;
                       _streamProcessDelay = delayMs;
-                      _googleSearchApiKey = apiKey;
-                      _googleSearchEngineId = engineId;
                     });
                     Navigator.pop(context);
                     
@@ -885,21 +815,6 @@ class _ImageCaptioningScreenState extends State<ImageCaptioningScreen> with Widg
         },
       ),
     );
-  }
-
-  // Timer to monitor if listening stopped unexpectedly
-  Timer? _listeningMonitorTimer;
-  
-  void _createListeningMonitor() {
-    _listeningMonitorTimer?.cancel();
-    
-    // Check every 2 seconds which is less frequent
-    _listeningMonitorTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
-      if (_isListening && !_speech.isListening && !_restartPending && !_inCooldownPeriod) {
-        print('Monitor detected listening stopped unexpectedly');
-        _scheduleRestart(400);
-      }
-    });
   }
 
   // New method for cooldown mode
@@ -952,6 +867,19 @@ class _ImageCaptioningScreenState extends State<ImageCaptioningScreen> with Widg
         );
       } else {
         _inCooldownPeriod = false;
+      }
+    });
+  }
+
+  // Timer to monitor if listening stopped unexpectedly
+  void _createListeningMonitor() {
+    _listeningMonitorTimer?.cancel();
+    
+    // Check every 2 seconds which is less frequent
+    _listeningMonitorTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
+      if (_isListening && !_speech.isListening && !_restartPending && !_inCooldownPeriod) {
+        print('Monitor detected listening stopped unexpectedly');
+        _scheduleRestart(400);
       }
     });
   }
@@ -1019,7 +947,7 @@ class _ImageCaptioningScreenState extends State<ImageCaptioningScreen> with Widg
                                   const CircularProgressIndicator(),
                                   const SizedBox(height: 16),
                                   Text(
-                                    'Searching for image...',
+                                    'Generating image...',
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w500,
@@ -1070,6 +998,44 @@ class _ImageCaptioningScreenState extends State<ImageCaptioningScreen> with Widg
                                         )
                                   : const SizedBox(),
                             ),
+                    ),
+                  
+                  // Display the prompt used to generate the image
+                  if (_generatedImageUrl != null && !_isGeneratingImage)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: theme.brightness == Brightness.light
+                            ? Colors.blue.withOpacity(0.1)
+                            : Colors.blue.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Generated from:',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue[700],
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _lastProcessedText,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontStyle: FontStyle.italic,
+                              color: theme.brightness == Brightness.light
+                                  ? Colors.black87
+                                  : Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   
                   // Captions

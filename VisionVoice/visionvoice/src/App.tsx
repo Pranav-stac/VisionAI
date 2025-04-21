@@ -62,6 +62,21 @@ function App() {
     }
   }, []);
 
+  // Add this description component near where the video stream is rendered
+  const StreamDescription = () => {
+    const isMobile = window.innerWidth <= 768;
+    
+    if (!isMobile) return null;
+    
+    return (
+      <div className="stream-description">
+        <div className="description-text">
+          <span className="highlight">Vision AI</span> brings the digital world to life through your ears
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="App">
       <LiveAPIProvider url={uri} apiKey={API_KEY}>
@@ -83,33 +98,23 @@ function App() {
                 {videoStream && (
                   <div style={{
                     position: 'absolute',
-                    top: '0',
+             
                     left: '50%',
                     transform: 'translateX(-50%)',
-                    backgroundColor: 'black',
+                    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                    top: '25px',
                     color: 'white',
-                    padding: '10px 20px',
-                    borderRadius: '0 0 16px 16px',
-                    fontSize: isMobile ? '20px' : '16px',
+                    padding: '6px 12px',
+                    borderRadius: '8px',
+                    fontSize: isMobile ? '16px' : '12px',
                     fontWeight: 'bold',
                     zIndex: 11,
-                    letterSpacing: '3px',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
-                    border: '1px solid rgba(255, 255, 255, 0.15)',
-                    textAlign: 'center',
-                    width: 'auto',
-                    minWidth: '180px',
-                    textTransform: 'uppercase',
-                    fontFamily: "'Space Mono', monospace"
+                    letterSpacing: '1px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                    backdropFilter: 'blur(4px)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)'
                   }}>
-                    <span style={{ 
-                      background: 'linear-gradient(120deg, #ffffff, #1f94ff)', 
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      display: 'inline-block'
-                    }}>
-                      Vision AI
-                    </span>
+                    VISION AI
                   </div>
                 )}
                 {cameraPermission === 'denied' && (
@@ -132,6 +137,7 @@ function App() {
                     <div style={{ fontSize: '16px', lineHeight: '1.4' }}>Please enable camera access in your browser settings to use this app.</div>
                   </div>
                 )}
+                <StreamDescription />
               </div>
               
               {/* APP goes here */}

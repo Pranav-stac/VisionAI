@@ -238,7 +238,7 @@ function ControlTray({
                 backdropFilter: 'blur(4px)',
                 border: '1px solid rgba(255,255,255,0.1)'
               }}>
-                {webcam.isBackCamera ? 'BACK CAM' : 'FRONT CAM'}
+               
               </div>
             )}
           </>
